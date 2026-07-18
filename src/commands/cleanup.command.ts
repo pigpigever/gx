@@ -3,7 +3,8 @@ import chalk from "chalk";
 import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch } from "../lib/git.js";
 import { getRepoTargets } from "../lib/config-store.js";
 import { confirmAction } from "../lib/interactor.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { startSpinner, fail } from "../lib/spinner.js";
+import { succeed } from "../lib/succeed.js";
 import * as out from "../lib/output.js";
 
 export function cleanupCommand(): Command {

@@ -15,7 +15,8 @@ import {
 import { isGhAuthenticated, checkExistingPR, createPR } from "../lib/github.js";
 import { selectTargets, promptForConfig, confirmAction } from "../lib/interactor.js";
 import { branchToTitle, generateBody } from "../lib/formatter.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { startSpinner, fail } from "../lib/spinner.js";
+import { succeed } from "../lib/succeed.js";
 import type { PRResult } from "../types.js";
 import * as out from "../lib/output.js";
 

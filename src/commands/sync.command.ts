@@ -10,7 +10,8 @@ import {
 } from "../lib/git.js";
 import { getDefaultMergeTarget } from "../lib/config-store.js";
 import { confirmAction } from "../lib/interactor.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { startSpinner, fail } from "../lib/spinner.js";
+import { succeed } from "../lib/succeed.js";
 import * as out from "../lib/output.js";
 
 export function syncCommand(): Command {
