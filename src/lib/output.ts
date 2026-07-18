@@ -146,3 +146,4 @@ function ciIcon(status: string): string {
 export function step(current: number, total: number, description: string): void {
   console.log(chalk.dim(`\n${t("step.indicator", { current, total })}`), chalk.bold(description));
 }
+// test ui change
