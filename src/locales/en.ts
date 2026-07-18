@@ -282,6 +282,28 @@ const en: LocaleStrings = {
     description: "Git Extended — batch PRs, safe merge, and git workflow automation",
   },
 
+  sweep: {
+    description: "Clean up gx temp merge branches",
+    optionDryRun: "Preview without deleting",
+    optionYes: "Skip confirmation",
+    title: "GX Temp Branches",
+    scanning: "Scanning for temp branches (merge/*)",
+    noneFound: "No temp branches found",
+    foundCount: "Found {{count}} temp branches",
+    fetchingPrs: "Fetching PR info",
+    prsFetched: "PR info fetched",
+    selectBranches: "Select temp branches to delete:",
+    confirmDelete: "Delete {{count}} selected temp branches?",
+    deletingRemote: "Deleting remote: {{name}}",
+    deletedRemote: "Deleted remote: {{name}}",
+    deleteRemoteFailed: "Failed to delete remote: {{name}}",
+    deletingLocal: "Deleting local: {{name}}",
+    deletedLocal: "Deleted local: {{name}}",
+    deleteLocalFailed: "Failed to delete local: {{name}}",
+    skippingCurrent: "Skipping current branch: {{name}}",
+    complete: "Sweep complete.",
+  },
+
   step: {
     indicator: "Step {{current}}/{{total}}:",
   },

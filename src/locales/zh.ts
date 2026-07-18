@@ -277,6 +277,28 @@ const zh: LocaleStrings = {
     description: "Git Extended — 批量 PR、安全合并、Git 工作流自动化",
   },
 
+  sweep: {
+    description: "清理 gx 临时合并分支",
+    optionDryRun: "预览而不删除",
+    optionYes: "跳过确认",
+    title: "GX 临时分支",
+    scanning: "扫描临时分支 (merge/*)",
+    noneFound: "未找到临时分支",
+    foundCount: "找到 {{count}} 个临时分支",
+    fetchingPrs: "获取 PR 信息",
+    prsFetched: "PR 信息已获取",
+    selectBranches: "选择要删除的临时分支:",
+    confirmDelete: "删除 {{count}} 个选中的临时分支？",
+    deletingRemote: "删除远程: {{name}}",
+    deletedRemote: "已删除远程: {{name}}",
+    deleteRemoteFailed: "删除远程失败: {{name}}",
+    deletingLocal: "删除本地: {{name}}",
+    deletedLocal: "已删除本地: {{name}}",
+    deleteLocalFailed: "删除本地失败: {{name}}",
+    skippingCurrent: "跳过当前分支: {{name}}",
+    complete: "清理完成。",
+  },
+
   step: {
     indicator: "步骤 {{current}}/{{total}}:",
   },

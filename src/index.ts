@@ -13,6 +13,7 @@ import { statusCommand } from "./commands/status.command.js";
 import { syncCommand } from "./commands/sync.command.js";
 import { cleanupCommand } from "./commands/cleanup.command.js";
 import { commitCommand } from "./commands/commit.command.js";
+import { sweepCommand } from "./commands/sweep.command.js";
 
 // Register locales (lazy-loaded)
 registerLocale("en", () => import("./locales/en.js"));
@@ -57,6 +58,7 @@ async function main() {
   program.addCommand(syncCommand());
   program.addCommand(cleanupCommand());
   program.addCommand(commitCommand());
+  program.addCommand(sweepCommand());
 
   // Default behavior: show help
   program.action(() => {
