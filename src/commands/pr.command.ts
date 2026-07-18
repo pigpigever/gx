@@ -14,7 +14,7 @@ import {
 } from "../lib/config-store.js";
 import { isGhAuthenticated, checkExistingPR, createPR, checkPRConflicts } from "../lib/github.js";
 import { selectTargets, promptForConfig, confirmAction, selectSourceBranch } from "../lib/interactor.js";
-import { branchToTitle, generateBody } from "../lib/formatter.js";
+import { generateBody, getPrTitle } from "../lib/formatter.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import { t } from "../lib/i18n.js";
 import type { PRResult } from "../types.js";
@@ -197,7 +197,7 @@ async function runPr(opts: any): Promise<void> {
     console.log(chalk.bold.cyan(`${t("general.dryRunPrefix")} ${t("pr.dryRunWouldCreate")}`));
     out.blank();
     for (const target of validTargets) {
-      const title = opts.title || branchToTitle(sourceBranch);
+      const title = opts.title || getPrTitle(sourceBranch);
       console.log(
         `  ${chalk.dim("→")} ${chalk.bold(sourceBranch)} ${chalk.dim("→")} ${chalk.bold(target)}  "${title}"`
       );
@@ -240,7 +240,7 @@ async function runPr(opts: any): Promise<void> {
     }
 
     try {
-      const title = opts.title || branchToTitle(sourceBranch);
+      const title = opts.title || getPrTitle(sourceBranch);
       const body = opts.body || generateBody(sourceBranch, target);
       const created = createPR({
         owner: ctx.owner,

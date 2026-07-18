@@ -18,7 +18,7 @@ import {
 import { getDefaultMergeTarget } from "../lib/config-store.js";
 import { createPR, isGhAuthenticated } from "../lib/github.js";
 import { confirmAction } from "../lib/interactor.js";
-import { branchToTitle, generateBody } from "../lib/formatter.js";
+import { generateBody, getPrTitle } from "../lib/formatter.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import { t } from "../lib/i18n.js";
 import * as out from "../lib/output.js";
@@ -89,7 +89,7 @@ async function runMerge(opts: any): Promise<void> {
   succeed(spinner, t("merge.fetched", { branch: targetBranch }));
 
   // ── Step 2: Create temp merge branch ──
-  const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 12);
+  const timestamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 12);
   const tempBranch = `merge/${sourceBranch.replace(/\//g, "-")}-to-${targetBranch.replace(/\//g, "-")}-${timestamp}`;
 
   spinner = startSpinner(t("merge.creatingTemp", { name: tempBranch }));
@@ -137,7 +137,7 @@ async function runMerge(opts: any): Promise<void> {
 
   // ── Step 5: Create PR ──
   spinner = startSpinner(t("merge.creatingPr"));
-  const title = branchToTitle(sourceBranch);
+  const title = getPrTitle(sourceBranch);
   const body = generateBody(sourceBranch, targetBranch);
 
   const pr = createPR({
@@ -163,60 +163,36 @@ async function continueMerge(): Promise<void> {
     throw new Error(t("merge.notOnMergeBranch"));
   }
 
+  if (isMergeInProgress() && !allConflictsResolved()) {
+    const files = getConflictedFiles();
+    throw new Error(
+      t("merge.conflictsUnresolved", { count: files.length, files: files.join("\n  ") })
+    );
+  }
+
   const tempBranch = execSync("git branch --show-current", { encoding: "utf-8" }).trim();
 
   out.blank();
   console.log(chalk.bold(t("merge.continuing")));
 
-  // ── Conflict resolution loop ──
-  while (isMergeInProgress()) {
-    const conflictedFiles = getConflictedFiles();
-    out.blank();
-    if (conflictedFiles.length > 0) {
-      console.log(
-        chalk.yellow.bold(`  ⚠️  ${t("merge.conflictsHeader", { count: conflictedFiles.length })}`)
-      );
-      out.blank();
-      for (const f of conflictedFiles) {
-        console.log(`      ${chalk.red(f)}`);
-      }
-      out.blank();
-    }
-
-    const resolved = await confirmAction(t("merge.conflictsResolvedPrompt"), false);
-    if (!resolved) {
-      console.log(chalk.dim(t("merge.resolveHint")));
-      return;
-    }
-
-    if (!allConflictsResolved()) {
-      out.warning(t("merge.conflictsStillUnresolved"));
-      // Loop back
-      continue;
-    }
-    // All resolved — break out to commit
-    break;
+  if (isMergeInProgress()) {
+    const s = startSpinner(t("merge.committingResolution"));
+    commitMerge();
+    succeed(s, t("merge.committedResolution"));
   }
 
-  // ── Commit resolution ──
-  const s = startSpinner(t("merge.committingResolution"));
-  commitMerge();
-  succeed(s, t("merge.committedResolution"));
-
-  // ── Push ──
-  let pushSpinner = startSpinner(t("merge.pushing"));
+  let s = startSpinner(t("merge.pushing"));
   pushBranch(tempBranch);
-  succeed(pushSpinner, t("merge.pushed", { name: chalk.cyan(tempBranch) }));
+  succeed(s, t("merge.pushed", { name: chalk.cyan(tempBranch) }));
 
-  // ── Create PR ──
   const ctx = getGitContext();
-  const targetMatch = tempBranch.match(/merge\/.+?-to-(.+?)-[\dT]{10,13}$/);
+  const targetMatch = tempBranch.match(/merge\/.+?-to-(.+?)-\d{12}$/);
   const targetBranch = targetMatch ? targetMatch[1] : "develop";
   const sourceMatch = tempBranch.match(/merge\/(.+?)-to-/);
   const sourceBranch = sourceMatch ? sourceMatch[1].replace(/-/g, "/") : "unknown";
 
-  const prSpinner = startSpinner(t("merge.creatingPr"));
-  const title = branchToTitle(sourceBranch);
+  s = startSpinner(t("merge.creatingPr"));
+  const title = getPrTitle(sourceBranch);
   const body = generateBody(sourceBranch, targetBranch);
 
   const pr = createPR({
@@ -229,7 +205,7 @@ async function continueMerge(): Promise<void> {
     draft: false,
   });
 
-  succeed(prSpinner, t("merge.prCreated", { url: pr.url }));
+  succeed(s, t("merge.prCreated", { url: pr.url }));
   out.blank();
   console.log(
     chalk.dim(t("cleanup.afterCleanupNote", { number: pr.number }))

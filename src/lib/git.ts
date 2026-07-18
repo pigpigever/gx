@@ -223,3 +223,8 @@ export function getUniqueCommits(source: string, target: string): string[] {
   if (!output) return [];
   return output.split("\n").filter(Boolean);
 }
+
+export function getLatestCommitMessage(branch: string): string | null {
+  const output = exec(`git log -1 --format=%s ${branch}`);
+  return output || null;
+}

@@ -119,7 +119,13 @@ describe("analyzeStaged (git)", () => {
   }
 
   it("detects no staged changes", () => {
-    expect(hasStagedChanges()).toBe(false);
+    const origCwd = process.cwd();
+    process.chdir(repoDir);
+    try {
+      expect(hasStagedChanges()).toBe(false);
+    } finally {
+      process.chdir(origCwd);
+    }
   });
 
   it("analyzes staged new file", () => {
