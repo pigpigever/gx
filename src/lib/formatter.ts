@@ -99,3 +99,4 @@ export function generateBody(
   sections.push(`${t("formatter.source")}: \`${sourceBranch}\` → \`${targetBranch}\``);
   return sections.join("\n");
 }
+// CONFLICTING change at end
