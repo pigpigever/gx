@@ -50,6 +50,9 @@ const en: LocaleStrings = {
     noTargetsChosen: "No target branches selected. Exiting.",
     onTargetBranch: "You are on target branch '{{branch}}' — pick a source branch:",
     noSourceBranches: "No feature branches found on remote to use as source.",
+    checkingOut: "Checking out {{branch}}",
+    checkedOut: "Checked out {{branch}}",
+    checkoutFailed: "Failed to checkout {{branch}}",
     branchNotFoundSkip: "branch not found on remote",
 
     dryRunWouldCreate: "Would create PRs:",

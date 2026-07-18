@@ -6,6 +6,7 @@ import {
   hasUnpushedCommits,
   branchExistsOnRemote,
   hasDiff,
+  checkoutBranch,
 } from "../lib/git.js";
 import {
   getRepoTargets,
@@ -61,6 +62,15 @@ async function runPr(opts: any): Promise<void> {
     }
     out.blank();
     sourceBranch = await selectSourceBranch(remoteBranches);
+    // Checkout the selected source branch so local git ops work
+    const checkoutSpinner = startSpinner(t("pr.checkingOut", { branch: sourceBranch }));
+    try {
+      checkoutBranch(sourceBranch);
+      succeed(checkoutSpinner, t("pr.checkedOut", { branch: sourceBranch }));
+    } catch {
+      fail(checkoutSpinner, t("pr.checkoutFailed", { branch: sourceBranch }));
+      throw new Error(t("pr.checkoutFailed", { branch: sourceBranch }));
+    }
   }
 
   out.printContext(ctx.owner, ctx.repo, sourceBranch);

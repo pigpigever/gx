@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.6] — 2026-07-18
+
+### Fixed
+- `gx pr`: auto-checkout selected source branch when on target, fixing "Head ref must be a branch" error
+
 ## [1.1.5] — 2026-07-18
 
 ### Added
