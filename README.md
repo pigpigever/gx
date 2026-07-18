@@ -31,12 +31,14 @@
 brew tap pigpigever/gx
 brew install gx
 
-# npm
+# npm / pnpm
 npm install -g gx
+# or
+pnpm add -g gx
 
 # From source
 git clone https://github.com/pigpigever/gx.git
-cd gx && npm install && npm run build && npm link
+cd gx && pnpm install && pnpm run build && pnpm link --global
 ```
 
 ## ⚡ Quick start
