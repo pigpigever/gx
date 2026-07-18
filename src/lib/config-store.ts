@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join } from "node:path";
 import { parse, stringify } from "yaml";
 import type { GxConfig, RepoConfig } from "../types.js";
 
@@ -14,6 +14,8 @@ const DEFAULT_CONFIG: GxConfig = {
   version: 1,
   repos: {},
 };
+
+let _cache: GxConfig | null = null;
 
 // ── Load / Save ──
 
@@ -36,6 +38,7 @@ export function saveConfig(config: GxConfig): void {
   }
   const yaml = stringify(config, { lineWidth: 120 });
   writeFileSync(CONFIG_PATH, yaml, "utf-8");
+  _cache = null;
 }
 
 // ── Repo targets ──

@@ -7,7 +7,6 @@ import {
   getRepoTargets,
   setTargets,
   getConfigPath,
-  getLanguage,
   setLanguage,
 } from "../lib/config-store.js";
 import { promptForConfig } from "../lib/interactor.js";

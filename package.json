@@ -15,7 +15,9 @@
     "dev": "tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && oxlint src/",
+    "lint:ox": "oxlint src/",
+    "lint:tsc": "tsc --noEmit",
     "verify": "pnpm run lint && pnpm run build && pnpm run test",
     "prepublishOnly": "pnpm run verify"
   },
@@ -37,6 +39,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.0",
+    "oxlint": "^1.74.0",
     "tsup": "^8.4.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.3",

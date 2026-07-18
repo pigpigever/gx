@@ -87,8 +87,6 @@ export function checkExistingPR(
     }
     return null;
   } catch {
-    // REST fallback done synchronously is complex; if gh CLI fails, return null
-    // (the caller can handle this gracefully)
     return null;
   }
 }
@@ -119,7 +117,6 @@ export function createPR(opts: PRCreateOptions): CreatedPR {
 
     return { url: output, number };
   } catch (err: any) {
-    // Try REST API fallback
     const token = getAuthToken();
     if (token) {
       const result = createPRRestSync(opts, token);
@@ -132,7 +129,6 @@ export function createPR(opts: PRCreateOptions): CreatedPR {
 }
 
 function createPRRestSync(opts: PRCreateOptions, token: string): CreatedPR | null {
-  // Use synchronous HTTP via child_process curl
   try {
     const body = JSON.stringify({
       title: opts.title,
@@ -185,7 +181,6 @@ export function listOpenPRs(
       draft: pr.isDraft || false,
     }));
   } catch {
-    // REST fallback
     const token = getAuthToken();
     if (token) return listOpenPRsRestSync(owner, repo, token);
     return [];

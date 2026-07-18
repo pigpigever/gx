@@ -9,7 +9,6 @@ import {
   checkoutBranch,
 } from "../lib/git.js";
 import {
-  getRepoTargets,
   setTargets,
   getRepoConfig,
 } from "../lib/config-store.js";
@@ -62,7 +61,7 @@ async function runPr(opts: any): Promise<void> {
     }
     out.blank();
     sourceBranch = await selectSourceBranch(remoteBranches);
-    // Checkout the selected source branch so local git ops work
+
     const checkoutSpinner = startSpinner(t("pr.checkingOut", { branch: sourceBranch }));
     try {
       checkoutBranch(sourceBranch);
@@ -275,11 +274,11 @@ async function runPr(opts: any): Promise<void> {
   out.printPRResults(results);
 
   // ── Conflict check ──
-  const createdResults = results.filter((r) => r.status === "created" && r.number);
-  if (createdResults.length > 0) {
+  const prsToCheck = results.filter((r) => r.number && (r.status === "created" || r.status === "skipped"));
+  if (prsToCheck.length > 0) {
     const conflictSpinner = startSpinner(t("pr.checkingConflicts"));
     const conflicts: PRResult[] = [];
-    for (const r of createdResults) {
+    for (const r of prsToCheck) {
       if (r.number && checkPRConflicts(ctx.owner, ctx.repo, r.number)) {
         conflicts.push(r);
       }
@@ -289,11 +288,12 @@ async function runPr(opts: any): Promise<void> {
       out.blank();
       for (const r of conflicts) {
         console.log(
-          chalk.yellow(`  ⚠ ${r.target}:`) + chalk.dim(` conflicts detected — run`)
+          chalk.yellow(`  ⚠ ${r.target}:`) + chalk.dim(" conflicts detected — run")
         );
         console.log(
           chalk.dim(`     gx merge --into ${r.target} --source ${sourceBranch}`)
         );
+        console.log(chalk.dim(`     ${r.url}`));
       }
       out.blank();
     } else {

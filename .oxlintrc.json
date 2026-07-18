@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import", "unicorn"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "typescript/no-explicit-any": "off"
+  },
+  "env": {
+    "node": true
+  },
+  "globals": {
+    "console": "readonly",
+    "process": "readonly"
+  }
+}

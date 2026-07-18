@@ -112,30 +112,12 @@ export function analyzeStaged(): StagedAnalysis {
     .split("\n")
     .filter(Boolean);
 
-  const stats = exec("git diff --staged --stat");
-  let added = 0, modified = 0, deleted = 0;
+  const _stats = exec("git diff --staged --stat");
 
-  for (const file of files) {
-    const diff = exec(`git diff --staged --numstat -- "${file}"`);
-    if (diff) {
-      const [a, d] = diff.split("\t");
-      const adds = parseInt(a, 10) || 0;
-      const dels = parseInt(d, 10) || 0;
-      added += adds;
-      if (adds === 0 && dels > 0) deleted++;
-      else if (dels === 0 && adds > 0 && !exec(`git ls-files --error-unmatch "${file}" 2>/dev/null && echo "exists"`)) {
-        // new file
-        added++;
-      } else {
-        modified++;
-      }
-    }
-  }
-
-  // Fallback: count by whether file exists in HEAD
+  // Count new/modified/deleted by whether file exists in HEAD
   let newFiles = 0, modFiles = 0, delFiles = 0;
   for (const file of files) {
-    const exists = exec(`git ls-files --error-unmatch "${file}" 2>/dev/null && echo "exists"`);
+    const _exists = exec(`git ls-files --error-unmatch "${file}" 2>/dev/null && echo "exists"`);
     const staged = exec(`git diff --staged --name-only --diff-filter=A -- "${file}"`);
     const deleted = exec(`git diff --staged --name-only --diff-filter=D -- "${file}"`);
     if (deleted) delFiles++;
@@ -170,5 +152,10 @@ export function getStagedDiff(): string {
 // ── Commit ──
 
 export function runCommit(message: string): void {
-  execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+  const escaped = message
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, "\\$")
+    .replace(/`/g, "\\`");
+  execSync(`git commit -m "${escaped}"`, { stdio: "inherit" });
 }
