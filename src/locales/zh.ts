@@ -132,6 +132,7 @@ const zh: LocaleStrings = {
     optionFrom: "同步来源分支（默认：从配置读取或 'develop'）",
     optionRebase: "使用 rebase 替代 merge",
     optionYes: "跳过确认",
+    optionMine: "只显示你创建的分支",
 
     syncingFrom: "同步来源: {{branch}}",
     fetching: "拉取 origin/{{branch}}",
@@ -156,6 +157,7 @@ const zh: LocaleStrings = {
     description: "删除已合并的分支",
     optionDryRun: "仅显示将要删除的分支",
     optionYes: "跳过确认",
+    optionMine: "只显示你创建的分支",
 
     scanning: "扫描已合并到 {{targets}} 的分支",
     noMerged: "未找到已合并的分支",
@@ -181,6 +183,7 @@ const zh: LocaleStrings = {
 
     selectBranches: "选择要删除的分支:",
     confirmDelete: "确认删除 {{count}} 个选中的分支？",
+    mineFilter: "已筛选出你的分支: {{mine}}/{{total}}",
     complete: "清理完成。",
     afterCleanupNote: "PR #{{number}} 合并后，可用 'gx cleanup' 清理。",
   },
@@ -281,6 +284,7 @@ const zh: LocaleStrings = {
     description: "清理 gx 临时合并分支",
     optionDryRun: "预览而不删除",
     optionYes: "跳过确认",
+    optionMine: "只显示你创建的分支",
     title: "GX 临时分支",
     scanning: "扫描临时分支 (merge/*)",
     noneFound: "未找到临时分支",
@@ -289,6 +293,7 @@ const zh: LocaleStrings = {
     prsFetched: "PR 信息已获取",
     selectBranches: "选择要删除的临时分支:",
     confirmDelete: "删除 {{count}} 个选中的临时分支？",
+    mineFilter: "已筛选出你的分支: {{mine}}/{{total}}",
     deletingRemote: "删除远程: {{name}}",
     deletedRemote: "已删除远程: {{name}}",
     deleteRemoteFailed: "删除远程失败: {{name}}",

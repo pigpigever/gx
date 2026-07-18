@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { checkbox } from "@inquirer/prompts";
 import chalk from "chalk";
-import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch } from "../lib/git.js";
+import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "../lib/git.js";
 import { getRepoTargets } from "../lib/config-store.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import { getPRsForBranch, type BranchPRInfo } from "../lib/github.js";
@@ -13,6 +13,7 @@ export function cleanupCommand(): Command {
     .description(t("cleanup.description"))
     .option("--dry-run", t("cleanup.optionDryRun"))
     .option("-y, --yes", t("cleanup.optionYes"))
+    .option("--mine", t("cleanup.optionMine"))
     .action(async (opts) => {
       try { await runCleanup(opts); }
       catch (err: any) { out.error(err.message); process.exit(1); }
@@ -36,6 +37,15 @@ async function runCleanup(opts: any): Promise<void> {
     return;
   }
   succeed(spinner, t("cleanup.foundMerged", { count: branches.length }));
+
+  // ── Filter: only user's branches ──
+  if (opts.mine) {
+    const filtered = branches.filter((b) => isUserBranch(b.name, targets));
+    out.info(t("cleanup.mineFilter", { total: branches.length, mine: filtered.length }));
+    if (filtered.length === 0) return;
+    branches.length = 0;
+    branches.push(...filtered);
+  }
 
   // ── Fetch PR info for each branch ──
   const prSpinner = startSpinner(t("cleanup.fetchingPrs"));

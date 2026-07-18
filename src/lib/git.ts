@@ -235,3 +235,14 @@ export function getLatestCommitMessage(branch: string): string | null {
   const output = exec(`git log -1 --format=%s ${branch}`);
   return output || null;
 }
+
+export function isUserBranch(branch: string, targets: string[]): boolean {
+  const author = exec("git config user.name");
+  if (!author) return true; // can't determine, assume yes
+  // Check if branch has commits by current user relative to any target
+  for (const target of targets) {
+    const output = exec(`git log ${target}..${branch} --author="${author}" --oneline`);
+    if (output) return true;
+  }
+  return false;
+}

@@ -158,6 +158,7 @@ const en: LocaleStrings = {
     description: "Delete branches that have been merged into target branches",
     optionDryRun: "Show what would be deleted without deleting",
     optionYes: "Skip confirmation",
+    optionMine: "Only show branches created by you",
 
     scanning: "Scanning branches merged into {{targets}}",
     noMerged: "No merged branches found",
@@ -183,6 +184,7 @@ const en: LocaleStrings = {
 
     selectBranches: "Select branches to delete:",
     confirmDelete: "Delete {{count}} selected branches?",
+    mineFilter: "Filtered to your branches: {{mine}} of {{total}}",
     complete: "Cleanup complete.",
     afterCleanupNote: "After PR #{{number}} is merged, clean up with 'gx cleanup'.",
   },
@@ -286,6 +288,7 @@ const en: LocaleStrings = {
     description: "Clean up gx temp merge branches",
     optionDryRun: "Preview without deleting",
     optionYes: "Skip confirmation",
+    optionMine: "Only show branches created by you",
     title: "GX Temp Branches",
     scanning: "Scanning for temp branches (merge/*)",
     noneFound: "No temp branches found",
@@ -294,6 +297,7 @@ const en: LocaleStrings = {
     prsFetched: "PR info fetched",
     selectBranches: "Select temp branches to delete:",
     confirmDelete: "Delete {{count}} selected temp branches?",
+    mineFilter: "Filtered to your branches: {{mine}} of {{total}}",
     deletingRemote: "Deleting remote: {{name}}",
     deletedRemote: "Deleted remote: {{name}}",
     deleteRemoteFailed: "Failed to delete remote: {{name}}",

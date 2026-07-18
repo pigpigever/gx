@@ -2,7 +2,8 @@ import { Command } from "commander";
 import { checkbox } from "@inquirer/prompts";
 import chalk from "chalk";
 import { execSync } from "node:child_process";
-import { getGitContext, deleteLocalBranch, deleteRemoteBranch } from "../lib/git.js";
+import { getGitContext, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "../lib/git.js";
+import { getRepoTargets } from "../lib/config-store.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import { getPRsForBranch, type BranchPRInfo } from "../lib/github.js";
 import { t } from "../lib/i18n.js";
@@ -44,6 +45,7 @@ export function sweepCommand(): Command {
     .description(t("sweep.description"))
     .option("--dry-run", t("sweep.optionDryRun"))
     .option("-y, --yes", t("sweep.optionYes"))
+    .option("--mine", t("sweep.optionMine"))
     .action(async (opts) => {
       try { await runSweep(opts); }
       catch (err: any) { out.error(err.message); process.exit(1); }
@@ -66,6 +68,17 @@ async function runSweep(opts: any): Promise<void> {
     return;
   }
   succeed(spinner, t("sweep.foundCount", { count: branches.length }));
+
+  // ── Filter: only user's branches ──
+  if (opts.mine) {
+    const targets = getRepoTargets(ctx.owner, ctx.repo);
+    if (targets.length === 0) targets.push("main");
+    const filtered = branches.filter((b) => isUserBranch(b.name, targets));
+    out.info(t("sweep.mineFilter", { total: branches.length, mine: filtered.length }));
+    if (filtered.length === 0) return;
+    branches.length = 0;
+    branches.push(...filtered);
+  }
 
   // ── Fetch PR info ──
   const prSpinner = startSpinner(t("sweep.fetchingPrs"));
