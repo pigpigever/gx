@@ -4,6 +4,7 @@ import chalk from "chalk";
 import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "../lib/git.js";
 import { getRepoTargets } from "../lib/config-store.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { confirmAction } from "../lib/interactor.js";
 import { getPRsForBranch, type BranchPRInfo } from "../lib/github.js";
 import { t } from "../lib/i18n.js";
 import * as out from "../lib/output.js";
@@ -39,7 +40,7 @@ async function runCleanup(opts: any): Promise<void> {
   succeed(spinner, t("cleanup.foundMerged", { count: branches.length }));
 
   // ── Filter: only user's branches ──
-  if (opts.mine) {
+  if (opts.mine || (!opts.yes && await confirmAction(t("cleanup.filterMinePrompt"), false))) {
     const filtered = branches.filter((b) => isUserBranch(b.name, targets));
     out.info(t("cleanup.mineFilter", { total: branches.length, mine: filtered.length }));
     if (filtered.length === 0) return;

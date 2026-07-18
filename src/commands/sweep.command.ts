@@ -5,6 +5,7 @@ import { execSync } from "node:child_process";
 import { getGitContext, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "../lib/git.js";
 import { getRepoTargets } from "../lib/config-store.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { confirmAction } from "../lib/interactor.js";
 import { getPRsForBranch, type BranchPRInfo } from "../lib/github.js";
 import { t } from "../lib/i18n.js";
 import * as out from "../lib/output.js";
@@ -70,7 +71,7 @@ async function runSweep(opts: any): Promise<void> {
   succeed(spinner, t("sweep.foundCount", { count: branches.length }));
 
   // ── Filter: only user's branches ──
-  if (opts.mine) {
+  if (opts.mine || (!opts.yes && await confirmAction(t("sweep.filterMinePrompt"), false))) {
     const targets = getRepoTargets(ctx.owner, ctx.repo);
     if (targets.length === 0) targets.push("main");
     const filtered = branches.filter((b) => isUserBranch(b.name, targets));
