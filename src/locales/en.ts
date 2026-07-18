@@ -64,7 +64,7 @@ const en: LocaleStrings = {
 
     results: "Results:",
     resultSummary: "{{created}} created, {{skipped}} skipped, {{errors}} errors",
-    skippedExisting: "skipped (PR already exists: #{{number}})",
+    skippedExisting: "skipped (existing PR)",
     skippedReason: "skipped ({{reason}})",
     errorPrefix: "error: {{msg}}",
   },

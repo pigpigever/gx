@@ -60,9 +60,15 @@ export function printPRResults(results: PRResult[]): void {
         `  ${chalk.green("✓")} ${chalk.bold(r.target.padEnd(12))} ${chalk.underline(r.url)}`
       );
     } else if (r.status === "skipped") {
-      console.log(
-        `  ${chalk.dim("⊘")} ${chalk.bold(r.target.padEnd(12))} ${chalk.dim(t("pr.skippedReason", { reason: r.error }))}`
-      );
+      if (r.url) {
+        console.log(
+          `  ${chalk.dim("⊘")} ${chalk.bold(r.target.padEnd(12))} ${chalk.dim(t("pr.skippedExisting"))} ${chalk.underline(r.url)}`
+        );
+      } else {
+        console.log(
+          `  ${chalk.dim("⊘")} ${chalk.bold(r.target.padEnd(12))} ${chalk.dim(t("pr.skippedReason", { reason: r.error }))}`
+        );
+      }
     } else {
       console.log(
         `  ${chalk.red("✗")} ${chalk.bold(r.target.padEnd(12))} ${chalk.red(t("pr.errorPrefix", { msg: r.error }))}`
