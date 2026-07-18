@@ -162,6 +162,9 @@ const en: LocaleStrings = {
     scanning: "Scanning branches merged into {{targets}}",
     noMerged: "No merged branches found",
     foundMerged: "Found {{count}} merged branches",
+    fetchingPrs: "Fetching PR info",
+    prsFetched: "PR info fetched",
+    noPr: "no associated PR",
 
     mergedHeader: "Merged branches (safe to delete):",
     tagGx: " [gx]",
@@ -178,6 +181,8 @@ const en: LocaleStrings = {
     deleteLocalFailed: "Failed to delete local: {{name}}",
     skippingCurrent: "Skipping current branch: {{name}}",
 
+    selectBranches: "Select branches to delete:",
+    confirmDelete: "Delete {{count}} selected branches?",
     complete: "Cleanup complete.",
     afterCleanupNote: "After PR #{{number}} is merged, clean up with 'gx cleanup'.",
   },

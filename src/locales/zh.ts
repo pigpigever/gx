@@ -160,6 +160,9 @@ const zh: LocaleStrings = {
     scanning: "扫描已合并到 {{targets}} 的分支",
     noMerged: "未找到已合并的分支",
     foundMerged: "找到 {{count}} 个已合并的分支",
+    fetchingPrs: "获取 PR 信息",
+    prsFetched: "PR 信息已获取",
+    noPr: "无关联 PR",
 
     mergedHeader: "已合并的分支（可安全删除）:",
     tagGx: " [gx]",
@@ -176,6 +179,8 @@ const zh: LocaleStrings = {
     deleteLocalFailed: "删除本地分支失败: {{name}}",
     skippingCurrent: "跳过当前分支: {{name}}",
 
+    selectBranches: "选择要删除的分支:",
+    confirmDelete: "确认删除 {{count}} 个选中的分支？",
     complete: "清理完成。",
     afterCleanupNote: "PR #{{number}} 合并后，可用 'gx cleanup' 清理。",
   },

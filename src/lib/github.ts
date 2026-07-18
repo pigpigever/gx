@@ -261,3 +261,25 @@ export function checkPRConflicts(owner: string, repo: string, number: number): b
     return false;
   }
 }
+
+// ── PR info for cleanup ──
+
+export interface BranchPRInfo {
+  number: number;
+  title: string;
+  state: string;
+  url: string;
+}
+
+export function getPRsForBranch(owner: string, repo: string, head: string): BranchPRInfo[] {
+  try {
+    const json = execSync(
+      `gh pr list --head "${head}" --repo "${owner}/${repo}" --json number,title,state,url`,
+      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
+    ).trim();
+    if (!json || json === "[]") return [];
+    return JSON.parse(json) as BranchPRInfo[];
+  } catch {
+    return [];
+  }
+}
