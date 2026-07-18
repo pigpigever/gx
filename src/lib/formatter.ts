@@ -71,7 +71,6 @@ export function generateBody(
 
   if (rawCommits.length === 0) {
     return [
-      `## ${t("formatter.summary")}`,
       t("formatter.noUniqueCommits"),
       ``,
       `${t("formatter.source")}: \`${sourceBranch}\` → \`${targetBranch}\``,
@@ -83,15 +82,7 @@ export function generateBody(
   const fixes = commits.filter((c) => isBugfix(c.type));
   const others = commits.filter((c) => !isFeature(c.type) && !isBugfix(c.type));
 
-  const summaryParts: string[] = [];
-  if (features.length > 0) summaryParts.push(`${t("formatter.featTag")}: ${features.map((c) => c.message).join(", ")}`);
-  if (fixes.length > 0) summaryParts.push(`${t("formatter.fixTag")}: ${fixes.map((c) => c.message).join(", ")}`);
-  const summary = (summaryParts.join("; ") || commits[0]?.message) ?? "-";
-
   const sections: string[] = [];
-  sections.push(`## ${t("formatter.summary")}`);
-  sections.push(summary);
-  sections.push("");
 
   if (features.length > 0) {
     sections.push(`### ${t("formatter.features")}`);
