@@ -268,7 +268,7 @@ const zh: LocaleStrings = {
     helpHint: "运行 'gx --help' 查看可用命令。",
     versionFlag: "输出版本号",
     quickActions: "快捷操作: gx pr | gx status | gx sync | gx merge | gx commit",
-    examples: "示例:\n  $ gx pr                          交互式选择目标分支创建 PR\n  $ gx pr --all                     对所有已配置目标创建 PR\n  $ gx pr --draft --dry-run         预览草稿 PR\n  $ gx merge --into develop         通过临时分支安全合并\n  $ gx merge --continue             解决冲突后继续\n  $ gx merge --abort                中止合并\n  $ gx status                       查看 PR 概览和合并状态\n  $ gx sync                         与基础分支同步\n  $ gx cleanup --dry-run            预览待删除的分支\n  $ gx commit                       智能约定式提交\n  $ gx commit --ai                  AI 生成提交消息\n  $ gx config add main              添加目标分支\n  $ gx config init                   交互式配置",
+    examples: "示例:\n  $ gx pr                          交互式选择目标分支创建 PR\n  $ gx pr --all                     对所有已配置目标创建 PR\n  $ gx pr --draft --dry-run         预览草稿 PR\n  $ gx merge --into develop         通过临时分支安全合并\n  $ gx merge --continue             解决冲突后继续\n  $ gx merge --abort                中止合并\n  $ gx status                       查看 PR 概览和合并状态\n  $ gx sync                         与基础分支同步\n  $ gx cleanup --dry-run            预览待删除的分支\n  $ gx commit                       智能约定式提交\n  $ gx commit --ai                  AI 生成提交消息\n  $ gx config add main              添加目标分支\n  $ gx config init                   交互式配置\n  $ gx config set-lang zh           切换到中文\n  $ gx config set-lang en           切换到英文",
     description: "Git Extended — 批量 PR、安全合并、Git 工作流自动化",
   },
 
