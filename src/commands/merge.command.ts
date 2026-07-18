@@ -19,8 +19,7 @@ import { getDefaultMergeTarget } from "../lib/config-store.js";
 import { createPR, isGhAuthenticated } from "../lib/github.js";
 import { confirmAction } from "../lib/interactor.js";
 import { branchToTitle, generateBody } from "../lib/formatter.js";
-import { startSpinner, fail } from "../lib/spinner.js";
-import { succeed } from "../lib/succeed.js";
+import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import * as out from "../lib/output.js";
 
 export function mergeCommand(): Command {
