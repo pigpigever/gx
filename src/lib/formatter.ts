@@ -32,21 +32,100 @@ export function branchToTitle(branch: string): string {
   return branch;
 }
 
+// ── Commit parsing ──
+
+interface ParsedCommit {
+  hash: string;
+  type: string;
+  scope: string;
+  message: string;
+}
+
+function parseCommit(line: string): ParsedCommit {
+  // Format: "abc1234 type(scope): message" or "abc1234 type: message"
+  const match = line.match(/^(\S+)\s+(.+)$/);
+  const hash = match?.[1] ?? "";
+  const fullMsg = match?.[2] ?? line;
+
+  const ccMatch = fullMsg.match(/^(\w+)(?:\((.+?)\))?:\s*(.+)/);
+  if (ccMatch) {
+    return { hash, type: ccMatch[1], scope: ccMatch[2] ?? "", message: ccMatch[3] };
+  }
+
+  return { hash, type: "other", scope: "", message: fullMsg };
+}
+
+function isFeature(type: string): boolean {
+  return type === "feat" || type === "feature";
+}
+
+function isBugfix(type: string): boolean {
+  return type === "fix" || type === "bugfix" || type === "hotfix";
+}
+
+// ── Body generation ──
+
 export function generateBody(
   sourceBranch: string,
   _targetBranch: string
 ): string {
-  const commits = getRecentCommits(sourceBranch, 5);
-  const summary = commits.length > 0
-    ? commits.map((c) => `- ${c}`).join("\n")
-    : t("formatter.noRecentCommits");
+  const rawCommits = getRecentCommits(sourceBranch, 10);
+  if (rawCommits.length === 0) {
+    return [
+      `## ${t("formatter.summary")}`,
+      t("formatter.noRecentCommits"),
+      ``,
+      `${t("formatter.source")}: \`${sourceBranch}\``,
+    ].join("\n");
+  }
 
-  return [
-    t("formatter.prGeneratedBy"),
-    ``,
-    `**${t("formatter.source")}** \`${sourceBranch}\``,
-    ``,
-    `## ${t("formatter.recentCommits")}`,
-    summary,
-  ].join("\n");
+  const commits = rawCommits.map(parseCommit);
+  const features = commits.filter((c) => isFeature(c.type));
+  const fixes = commits.filter((c) => isBugfix(c.type));
+  const others = commits.filter((c) => !isFeature(c.type) && !isBugfix(c.type));
+
+  // Build summary line
+  const summaryParts: string[] = [];
+  if (features.length > 0) {
+    const featMsgs = features.map((c) => c.message).join(", ");
+    summaryParts.push(`${t("formatter.featTag")}: ${featMsgs}`);
+  }
+  if (fixes.length > 0) {
+    const fixMsgs = fixes.map((c) => c.message).join(", ");
+    summaryParts.push(`${t("formatter.fixTag")}: ${fixMsgs}`);
+  }
+  const summary = (summaryParts.join("; ") || commits[0]?.message) ?? t("formatter.noRecentCommits");
+
+  const sections: string[] = [];
+  sections.push(`## ${t("formatter.summary")}`);
+  sections.push(summary);
+  sections.push("");
+
+  if (features.length > 0) {
+    sections.push(`### ${t("formatter.features")}`);
+    for (const c of features) {
+      sections.push(`- ${c.hash.slice(0, 7)} ${c.message}`);
+    }
+    sections.push("");
+  }
+
+  if (fixes.length > 0) {
+    sections.push(`### ${t("formatter.bugfixes")}`);
+    for (const c of fixes) {
+      sections.push(`- ${c.hash.slice(0, 7)} ${c.message}`);
+    }
+    sections.push("");
+  }
+
+  if (others.length > 0) {
+    sections.push(`### ${t("formatter.other")}`);
+    for (const c of others) {
+      sections.push(`- ${c.hash.slice(0, 7)} ${c.message}`);
+    }
+    sections.push("");
+  }
+
+  sections.push(`${t("formatter.source")}: \`${sourceBranch}\``);
+
+  return sections.join("\n");
 }

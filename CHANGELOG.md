@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.9] — 2026-07-18
+
+### Changed
+- PR body generation: categorized into Summary / Features / Bug Fixes / Other Changes
+- Removed "gx" branding from generated PR messages
+- Summary line added at top of PR body with key changes
+
 ## [1.1.8] — 2026-07-18
 
 ### Added

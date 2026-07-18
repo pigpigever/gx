@@ -251,9 +251,13 @@ const en: LocaleStrings = {
 
   formatter: {
     noRecentCommits: "No recent commits found.",
-    prGeneratedBy: "This PR was automatically created by gx.",
-    source: "Source:",
-    recentCommits: "Recent Commits",
+    source: "Source",
+    summary: "Summary",
+    features: "Features",
+    bugfixes: "Bug Fixes",
+    other: "Other Changes",
+    featTag: "Feature",
+    fixTag: "Fix",
   },
 
   home: {
