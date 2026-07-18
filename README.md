@@ -33,7 +33,6 @@ brew install gx
 
 # npm / pnpm
 npm install -g gx
-# or
 pnpm add -g gx
 
 # From source
@@ -93,6 +92,29 @@ Show all open PRs, CI status, and merge state for the current repo.
 gx status
 ```
 
+### 🧠 `gx commit` — smart conventional commit
+
+Interactive commit builder with type/scope auto-detection. Or let AI write the message.
+
+```bash
+gx commit                      # interactive: pick type → scope → message
+gx commit --ai                 # AI generates message from staged diff
+gx commit -m "fix: typo"       # shortcut: skip interactive
+gx commit --dry-run            # preview without committing
+```
+
+AI mode requires an OpenAI-compatible API key. Configure it in `~/.config/gx/config.yaml`:
+
+```yaml
+commit:
+  ai:
+    model: gpt-4o-mini
+    endpoint: https://api.openai.com/v1/chat/completions
+    apiKey: sk-...              # or set GX_AI_KEY env var
+```
+
+If AI fails, it automatically falls back to interactive mode.
+
 ### 🧹 `gx cleanup` — delete merged branches
 
 Remove local and remote branches that have been merged.
@@ -117,6 +139,7 @@ gx config set-lang en          # set display language
 - 🏠 **Zero repo pollution.** Config is stored at `~/.config/gx/config.yaml`, never touches your repo. `gx merge` uses git's native `.git/MERGE_HEAD` for state — no extra files.
 - 🐙 **GH CLI first, REST API fallback.** Uses `gh` when available, curls GitHub API when not.
 - ⚡ **Parallel PR creation.** Multiple targets created simultaneously.
+- 🧠 **Smart commit.** Auto-detects conventional commit type from branch name + file paths. Optional AI generation.
 - 🌍 **i18n ready.** Built-in locale system — add new languages with a single file.
 
 ## 🗂️ Config
@@ -138,5 +161,5 @@ repos:
 
 ## ✅ Requirements
 
-- Node.js ≥ 18 (npm install) or none (Homebrew binary)
+- Node.js ≥ 18 (npm/pnpm install) or none (Homebrew binary)
 - `gh` CLI authenticated (recommended) or `GITHUB_TOKEN` env var
