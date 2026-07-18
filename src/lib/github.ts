@@ -226,7 +226,11 @@ function listOpenPRsRestSync(
 // ── Helpers ──
 
 function escapeShell(str: string): string {
-  return str.replace(/"/g, '\\"');
+  return str
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, "\\$")
+    .replace(/`/g, "\\`");
 }
 
 function parseCIStatus(

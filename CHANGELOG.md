@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.7] — 2026-07-18
+
+### Fixed
+- `gh pr create` shell escaping: backticks in PR body (`` `branch-name` ``) were interpreted as command substitution, causing "No such file or directory" errors
+
 ## [1.1.6] — 2026-07-18
 
 ### Fixed
