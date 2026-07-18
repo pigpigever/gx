@@ -50,14 +50,14 @@ const BRANCH_TYPE_PREFIXES: Record<string, CommitType> = {
   revert: "revert",
 };
 
-function inferTypeFromBranch(branch: string): CommitType | null {
+export function inferTypeFromBranch(branch: string): CommitType | null {
   const prefix = branch.split("/")[0].toLowerCase();
   return BRANCH_TYPE_PREFIXES[prefix] ?? null;
 }
 
 // ── Scope inference from file paths ──
 
-function inferScope(files: string[]): string {
+export function inferScope(files: string[]): string {
   if (files.length === 0) return "";
 
   const dirs = files.map((f) => {
@@ -89,7 +89,7 @@ function inferScope(files: string[]): string {
 
 // ── Type inference from file content ──
 
-function inferTypeFromFiles(files: string[]): CommitType {
+export function inferTypeFromFiles(files: string[]): CommitType {
   const hasDocs = files.every((f) => f.endsWith(".md") || f.startsWith("docs/"));
   if (hasDocs) return "docs";
 
