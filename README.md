@@ -1,6 +1,28 @@
 # gx — Git Extended
 
-Batch PRs, safe merge, and git workflow automation — one command.
+<p align="center">
+<pre align="center">
+
+ ██████╗   ██╗  ██╗
+██╔════╝   ╚██╗██╔╝
+██║  ███╗   ╚███╔╝
+██║   ██║   ██╔██╗
+╚██████╔╝  ██╔╝ ██╗
+ ╚═════╝   ╚═╝  ╚═╝
+</pre>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/gx"><img src="https://img.shields.io/npm/v/gx?color=c95f3b" alt="npm version"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/gx?color=47a248" alt="node version"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/npm/l/gx?color=informational" alt="license"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript"></a>
+  <a href="https://github.com/pigpigever/gx"><img src="https://img.shields.io/github/stars/pigpigever/gx?style=social" alt="stars"></a>
+</p>
+
+<p align="center">
+  Batch PRs, safe merge, and git workflow automation — one command.
+</p>
 
 ## Install
 
@@ -85,6 +107,7 @@ gx config init                 # interactive setup
 gx config add main             # add target branch
 gx config remove staging       # remove target branch
 gx config list                 # show current targets
+gx config set-lang en          # set display language
 ```
 
 ## How it works
@@ -92,12 +115,14 @@ gx config list                 # show current targets
 - **Zero repo pollution.** Config is stored at `~/.config/gx/config.yaml`, never touches your repo. `gx merge` uses git's native `.git/MERGE_HEAD` for state — no extra files.
 - **GH CLI first, REST API fallback.** Uses `gh` when available, curls GitHub API when not.
 - **Parallel PR creation.** Multiple targets created simultaneously.
+- **i18n ready.** Built-in locale system — add new languages with a single file.
 
 ## Config
 
 ```yaml
 # ~/.config/gx/config.yaml
 version: 1
+language: en
 repos:
   pigpigever/todo-list:
     targets:
