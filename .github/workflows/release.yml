@@ -25,7 +25,6 @@ jobs:
         continue-on-error: true
 
   binaries:
-    needs: [npm-package]
     strategy:
       matrix:
         include:
@@ -61,6 +60,7 @@ jobs:
 
   release:
     needs: [binaries]
+    if: always() && !cancelled()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
