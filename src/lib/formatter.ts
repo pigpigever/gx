@@ -32,38 +32,7 @@ export function branchToTitle(branch: string): string {
   return branch;
 }
 
-// ── Commit parsing ──
-
-interface ParsedCommit {
-  hash: string;
-  type: string;
-  scope: string;
-  message: string;
-}
-
-function parseCommit(line: string): ParsedCommit {
-  const match = line.match(/^(\S+)\s+(.+)$/);
-  const hash = match?.[1] ?? "";
-  const fullMsg = match?.[2] ?? line;
-
-  const ccMatch = fullMsg.match(/^(\w+)(?:\((.+?)\))?:\s*(.+)/);
-  if (ccMatch) {
-    return { hash, type: ccMatch[1], scope: ccMatch[2] ?? "", message: ccMatch[3] };
-  }
-  return { hash, type: "other", scope: "", message: fullMsg };
-}
-
-function isFeature(type: string): boolean {
-  return type === "feat" || type === "feature";
-}
-
-function isBugfix(type: string): boolean {
-  return type === "fix" || type === "bugfix" || type === "hotfix";
-}
-
 // ── Body generation ──
-
-// ── Commit parsing ──
 
 interface ParsedCommit {
   hash: string;

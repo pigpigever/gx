@@ -89,7 +89,7 @@ async function runMerge(opts: any): Promise<void> {
   succeed(spinner, t("merge.fetched", { branch: targetBranch }));
 
   // ── Step 2: Create temp merge branch ──
-  const timestamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 12);
+  const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 12);
   const tempBranch = `merge/${sourceBranch.replace(/\//g, "-")}-to-${targetBranch.replace(/\//g, "-")}-${timestamp}`;
 
   spinner = startSpinner(t("merge.creatingTemp", { name: tempBranch }));
@@ -186,7 +186,7 @@ async function continueMerge(): Promise<void> {
   succeed(s, t("merge.pushed", { name: chalk.cyan(tempBranch) }));
 
   const ctx = getGitContext();
-  const targetMatch = tempBranch.match(/merge\/.+?-to-(.+?)-\d{12}$/);
+  const targetMatch = tempBranch.match(/merge\/.+?-to-(.+?)-[\dT]{10,13}$/);
   const targetBranch = targetMatch ? targetMatch[1] : "develop";
   const sourceMatch = tempBranch.match(/merge\/(.+?)-to-/);
   const sourceBranch = sourceMatch ? sourceMatch[1].replace(/-/g, "/") : "unknown";
