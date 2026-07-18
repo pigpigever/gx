@@ -217,3 +217,9 @@ export function getCommitLogBetween(head: string, base: string): string[] {
   if (!output) return [];
   return output.split("\n").filter(Boolean);
 }
+
+export function getUniqueCommits(source: string, target: string): string[] {
+  const output = exec(`git log --oneline ${target}..${source}`);
+  if (!output) return [];
+  return output.split("\n").filter(Boolean);
+}

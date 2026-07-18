@@ -251,6 +251,7 @@ const en: LocaleStrings = {
 
   formatter: {
     noRecentCommits: "No recent commits found.",
+    noUniqueCommits: "No unique commits on this branch.",
     source: "Source",
     summary: "Summary",
     features: "Features",
