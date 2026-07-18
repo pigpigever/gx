@@ -10,6 +10,7 @@ import {
 } from "../lib/git.js";
 import { getDefaultMergeTarget } from "../lib/config-store.js";
 import { confirmAction } from "../lib/interactor.js";
+import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import * as out from "../lib/output.js";
 
 export function syncCommand(): Command {
@@ -19,90 +20,62 @@ export function syncCommand(): Command {
     .option("--rebase", "Use rebase instead of merge")
     .option("-y, --yes", "Skip confirmation")
     .action(async (opts) => {
-      try {
-        await runSync(opts);
-      } catch (err: any) {
-        out.error(err.message);
-        process.exit(1);
-      }
+      try { await runSync(opts); }
+      catch (err: any) { out.error(err.message); process.exit(1); }
     });
-
   return cmd;
 }
 
 async function runSync(opts: any): Promise<void> {
   const ctx = getGitContext();
   const sourceBranch = ctx.currentBranch;
-  const fromBranch =
-    opts.from || getDefaultMergeTarget(ctx.owner, ctx.repo) || "develop";
+  const fromBranch = opts.from || getDefaultMergeTarget(ctx.owner, ctx.repo) || "develop";
 
   out.printContext(ctx.owner, ctx.repo, sourceBranch);
   console.log(chalk.bold(`🎯 Syncing from: ${chalk.yellow(fromBranch)}`));
   out.blank();
 
-  // Fetch
-  console.log(chalk.dim("Fetching latest..."));
+  let spinner = startSpinner(`Fetching origin/${fromBranch}`);
   fetchBranch(fromBranch);
-  out.success(`Fetched origin/${fromBranch}`);
+  succeed(spinner, `Fetched origin/${fromBranch}`);
 
-  // Check if behind
   if (!isBehindRemote(sourceBranch, fromBranch)) {
     out.success(`Already up to date with origin/${fromBranch}`);
     return;
   }
 
-  // Show what's new
   const commits = getBehindCommits(sourceBranch, fromBranch);
   out.blank();
-  console.log(
-    chalk.yellow(
-      `New commits on origin/${fromBranch} (${commits.length}):`
-    )
-  );
-  for (const c of commits) {
-    console.log(`  ${chalk.dim(c)}`);
-  }
+  console.log(chalk.yellow(`New commits on origin/${fromBranch} (${commits.length}):`));
+  for (const c of commits) console.log(`  ${chalk.dim(c)}`);
   out.blank();
 
-  // Confirm
   if (!opts.yes) {
     const proceed = await confirmAction(
-      `${opts.rebase ? "Rebase" : "Merge"} origin/${fromBranch} into ${sourceBranch}?`,
-      true
+      `${opts.rebase ? "Rebase" : "Merge"} origin/${fromBranch} into ${sourceBranch}?`, true
     );
-    if (!proceed) {
-      console.log(chalk.dim("Aborted."));
-      return;
-    }
+    if (!proceed) { console.log(chalk.dim("Aborted.")); return; }
   }
 
-  // Merge or rebase
   if (opts.rebase) {
-    console.log(chalk.dim(`Rebasing onto origin/${fromBranch}...`));
+    spinner = startSpinner(`Rebasing onto origin/${fromBranch}`);
     try {
-      execSync(`git rebase origin/${fromBranch}`, { stdio: "inherit" });
-      out.success(`Rebased ${sourceBranch} onto origin/${fromBranch}`);
+      execSync(`git rebase origin/${fromBranch}`, { stdio: "pipe" });
+      succeed(spinner, `Rebased ${sourceBranch} onto origin/${fromBranch}`);
     } catch {
-      out.error(
-        "Rebase conflicts detected. Resolve conflicts, then run 'git rebase --continue'."
-      );
+      fail(spinner, "Rebase conflicts detected");
+      out.error("Resolve conflicts, then run 'git rebase --continue'.");
     }
   } else {
-    console.log(chalk.dim(`Merging origin/${fromBranch} into ${sourceBranch}...`));
+    spinner = startSpinner(`Merging origin/${fromBranch} into ${sourceBranch}`);
     const result = mergeBranch(`origin/${fromBranch}`);
     if (result.hasConflicts) {
-      out.error(
-        `Merge conflicts in ${result.conflictedFiles.length} file(s):`
-      );
-      for (const f of result.conflictedFiles) {
-        console.log(`  ${chalk.red(f)}`);
-      }
+      fail(spinner, `${result.conflictedFiles.length} conflict(s)`);
+      for (const f of result.conflictedFiles) console.log(`  ${chalk.red(f)}`);
       out.blank();
-      console.log(
-        chalk.yellow("Resolve conflicts, then commit. Run 'gx sync' again to verify.")
-      );
+      console.log(chalk.yellow("Resolve conflicts, then commit. Run 'gx sync' again to verify."));
     } else {
-      out.success(`Merged origin/${fromBranch} into ${sourceBranch}`);
+      succeed(spinner, `Merged origin/${fromBranch} into ${sourceBranch}`);
     }
   }
 }

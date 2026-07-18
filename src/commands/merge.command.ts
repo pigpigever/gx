@@ -19,6 +19,7 @@ import { getDefaultMergeTarget } from "../lib/config-store.js";
 import { createPR, isGhAuthenticated } from "../lib/github.js";
 import { confirmAction } from "../lib/interactor.js";
 import { branchToTitle, generateBody } from "../lib/formatter.js";
+import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import * as out from "../lib/output.js";
 
 export function mergeCommand(): Command {
@@ -86,23 +87,24 @@ async function runMerge(opts: any): Promise<void> {
   }
 
   // ── Step 1: Fetch target ──
-  out.step(1, 5, `Fetching latest ${targetBranch}...`);
+  let spinner = startSpinner(`Fetching origin/${targetBranch}`);
   fetchBranch(targetBranch);
-  out.success(`Fetched origin/${targetBranch}`);
+  succeed(spinner, `Fetched origin/${targetBranch}`);
 
   // ── Step 2: Create temp merge branch ──
   const timestamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 12);
   const tempBranch = `merge/${sourceBranch.replace(/\//g, "-")}-to-${targetBranch.replace(/\//g, "-")}-${timestamp}`;
 
-  out.step(2, 5, `Creating temp branch: ${tempBranch}`);
+  spinner = startSpinner(`Creating temp branch: ${tempBranch}`);
   createBranch(tempBranch, targetBranch);
-  out.success(`Created ${tempBranch}`);
+  succeed(spinner, `Created ${chalk.cyan(tempBranch)}`);
 
   // ── Step 3: Merge source into temp ──
-  out.step(3, 5, `Merging ${sourceBranch} → ${tempBranch}`);
+  spinner = startSpinner(`Merging ${sourceBranch} → ${tempBranch}`);
   const mergeResult = mergeBranch(sourceBranch);
 
   if (mergeResult.hasConflicts) {
+    fail(spinner, `${mergeResult.conflictedFiles.length} conflict(s) detected`);
     out.blank();
     console.log(
       chalk.yellow.bold(
@@ -129,15 +131,15 @@ async function runMerge(opts: any): Promise<void> {
     return;
   }
 
-  out.success("No conflicts — clean merge");
+  succeed(spinner, "Merged cleanly — no conflicts");
 
   // ── Step 4: Push ──
-  out.step(4, 5, "Pushing temp branch...");
+  spinner = startSpinner("Pushing temp branch");
   pushBranch(tempBranch);
-  out.success(`Pushed ${tempBranch}`);
+  succeed(spinner, `Pushed ${chalk.cyan(tempBranch)}`);
 
   // ── Step 5: Create PR ──
-  out.step(5, 5, "Creating PR...");
+  spinner = startSpinner("Creating PR");
   const title = branchToTitle(sourceBranch);
   const body = generateBody(sourceBranch, targetBranch);
 
@@ -151,7 +153,7 @@ async function runMerge(opts: any): Promise<void> {
     draft: false,
   });
 
-  out.success(`PR created: ${chalk.underline(pr.url)}`);
+  succeed(spinner, `PR created: ${pr.url}`);
   out.blank();
   console.log(
     chalk.dim(`After PR #${pr.number} is merged, the temp branch can be deleted with 'gx cleanup'.`)
@@ -160,7 +162,6 @@ async function runMerge(opts: any): Promise<void> {
 }
 
 async function continueMerge(): Promise<void> {
-  // Check we're in a valid state
   if (!isOnGxMergeBranch()) {
     throw new Error(
       "Not on a gx merge branch. Run 'gx merge' to start a new merge."
@@ -179,28 +180,23 @@ async function continueMerge(): Promise<void> {
   out.blank();
   console.log(chalk.bold("Continuing merge..."));
 
-  // Commit any staged changes (if merge was in progress and conflicts resolved)
   if (isMergeInProgress()) {
+    const s = startSpinner("Committing merge resolution");
     commitMerge();
-    out.success("Committed merge resolution");
+    succeed(s, "Committed merge resolution");
   }
 
-  // Push
-  out.step(4, 5, "Pushing temp branch...");
+  let s = startSpinner("Pushing temp branch");
   pushBranch(tempBranch);
-  out.success(`Pushed ${tempBranch}`);
+  succeed(s, `Pushed ${chalk.cyan(tempBranch)}`);
 
-  // Create PR
   const ctx = getGitContext();
-  // Extract target from branch name: merge/feat-x-to-develop-20250718 → develop
   const targetMatch = tempBranch.match(/merge\/.+?-to-(.+?)-\d{12}$/);
   const targetBranch = targetMatch ? targetMatch[1] : "develop";
-
-  // Extract source from branch name
   const sourceMatch = tempBranch.match(/merge\/(.+?)-to-/);
   const sourceBranch = sourceMatch ? sourceMatch[1].replace(/-/g, "/") : "unknown";
 
-  out.step(5, 5, "Creating PR...");
+  s = startSpinner("Creating PR");
   const title = branchToTitle(sourceBranch);
   const body = generateBody(sourceBranch, targetBranch);
 
@@ -214,7 +210,7 @@ async function continueMerge(): Promise<void> {
     draft: false,
   });
 
-  out.success(`PR created: ${chalk.underline(pr.url)}`);
+  succeed(s, `PR created: ${pr.url}`);
   out.blank();
   console.log(
     chalk.dim(`After PR #${pr.number} is merged, clean up with 'gx cleanup'.`)
