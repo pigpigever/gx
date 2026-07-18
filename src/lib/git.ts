@@ -217,3 +217,4 @@ export function getCommitLogBetween(head: string, base: string): string[] {
   if (!output) return [];
   return output.split("\n").filter(Boolean);
 }
+// fixed typo in comment
