@@ -7,6 +7,7 @@ import {
   branchExistsOnRemote,
   hasDiff,
   checkoutBranch,
+  fetchAll,
 } from "../lib/git.js";
 import {
   setTargets,
@@ -111,6 +112,7 @@ async function runPr(opts: any): Promise<void> {
 
   // ── Determine targets ──
   let targets: string[];
+  fetchAll();
 
   if (opts.targets) {
     targets = opts.targets.split(",").map((t: string) => t.trim()).filter(Boolean);

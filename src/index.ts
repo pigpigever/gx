@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import chalk from "chalk";
 import pkg from "../package.json";
 
 import { registerLocale, initI18n, loadLocale, t } from "./lib/i18n.js";
@@ -15,6 +16,16 @@ import { commitCommand } from "./commands/commit.command.js";
 
 // Register locales (lazy-loaded)
 registerLocale("en", () => import("./locales/en.js"));
+registerLocale("zh", () => import("./locales/zh.js"));
+
+const LOGO = chalk.cyan(`
+ ██████╗   ██╗  ██╗
+██╔════╝   ╚██╗██╔╝
+██║  ███╗   ╚███╔╝
+██║   ██║   ██╔██╗
+╚██████╔╝  ██╔╝ ██╗
+ ╚═════╝   ╚═╝  ╚═╝
+`);
 
 // Bootstrap i18n and run CLI
 async function main() {
@@ -27,8 +38,16 @@ async function main() {
   program
     .name("gx")
     .description(t("home.description"))
-    .version(pkg.version, "-V, --version", "Output version")
-    .addHelpText("after", t("home.examples"));
+    .version(pkg.version, "-V, --version", t("home.versionFlag"))
+    .addHelpText("beforeAll", LOGO)
+    .addHelpText("after", `\n${chalk.dim(t("home.examples"))}`)
+    .configureHelp({
+      styleTitle: (str) => chalk.bold.cyan(str),
+      styleCommandText: (str) => `${chalk.cyan(str)}`,
+      styleCommandDescription: (str) => chalk.dim(str),
+      styleDescriptionText: (str) => chalk.dim(str),
+      styleOptionText: (str) => chalk.yellow(str),
+    });
 
   // Register commands
   program.addCommand(prCommand());
@@ -39,16 +58,15 @@ async function main() {
   program.addCommand(cleanupCommand());
   program.addCommand(commitCommand());
 
-  // Default behavior: if no args, show status
+  // Default behavior: show help
   program.action(() => {
-    console.log(t("home.helpHint"));
-    console.log(t("home.quickActions"));
+    program.outputHelp();
   });
 
   program.parse();
 }
 
 main().catch((err) => {
-  console.error(err.message);
+  console.error(chalk.red(err.message));
   process.exit(1);
 });

@@ -149,6 +149,12 @@ export function getMergeHead(): string {
   return exec("cat .git/MERGE_HEAD").trim();
 }
 
+// ── Fetch ──
+
+export function fetchAll(): void {
+  exec("git fetch --all --prune --quiet");
+}
+
 // ── Sync ──
 
 export function getLatestCommit(branch: string): string {
