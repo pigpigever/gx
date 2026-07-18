@@ -17,6 +17,7 @@ export interface RepoConfig {
 
 export interface GxConfig {
   version: number;
+  language?: string;
   repos: Record<string, RepoConfig>; // "owner/repo" → RepoConfig
 }
 

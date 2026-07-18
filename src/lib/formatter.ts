@@ -1,4 +1,5 @@
 import { getRecentCommits } from "./git.js";
+import { t } from "./i18n.js";
 
 const TITLE_PREFIXES: Record<string, string> = {
   feat: "feat: ",
@@ -38,14 +39,14 @@ export function generateBody(
   const commits = getRecentCommits(sourceBranch, 5);
   const summary = commits.length > 0
     ? commits.map((c) => `- ${c}`).join("\n")
-    : "No recent commits found.";
+    : t("formatter.noRecentCommits");
 
   return [
-    `This PR was automatically created by gx.`,
+    t("formatter.prGeneratedBy"),
     ``,
-    `**Source:** \`${sourceBranch}\``,
+    `**${t("formatter.source")}** \`${sourceBranch}\``,
     ``,
-    `## Recent Commits`,
+    `## ${t("formatter.recentCommits")}`,
     summary,
   ].join("\n");
 }

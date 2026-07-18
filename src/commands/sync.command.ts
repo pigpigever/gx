@@ -11,14 +11,15 @@ import {
 import { getDefaultMergeTarget } from "../lib/config-store.js";
 import { confirmAction } from "../lib/interactor.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { t } from "../lib/i18n.js";
 import * as out from "../lib/output.js";
 
 export function syncCommand(): Command {
   const cmd = new Command("sync")
-    .description("Sync current branch with its base target branch")
-    .option("--from <branch>", "Branch to sync from (default: from config or 'develop')")
-    .option("--rebase", "Use rebase instead of merge")
-    .option("-y, --yes", "Skip confirmation")
+    .description(t("sync.description"))
+    .option("--from <branch>", t("sync.optionFrom"))
+    .option("--rebase", t("sync.optionRebase"))
+    .option("-y, --yes", t("sync.optionYes"))
     .action(async (opts) => {
       try { await runSync(opts); }
       catch (err: any) { out.error(err.message); process.exit(1); }
@@ -32,50 +33,53 @@ async function runSync(opts: any): Promise<void> {
   const fromBranch = opts.from || getDefaultMergeTarget(ctx.owner, ctx.repo) || "develop";
 
   out.printContext(ctx.owner, ctx.repo, sourceBranch);
-  console.log(chalk.bold(`🎯 Syncing from: ${chalk.yellow(fromBranch)}`));
+  console.log(chalk.bold(`🎯 ${t("sync.syncingFrom", { branch: fromBranch })}`));
   out.blank();
 
-  let spinner = startSpinner(`Fetching origin/${fromBranch}`);
+  let spinner = startSpinner(t("sync.fetching", { branch: fromBranch }));
   fetchBranch(fromBranch);
-  succeed(spinner, `Fetched origin/${fromBranch}`);
+  succeed(spinner, t("sync.fetched", { branch: fromBranch }));
 
   if (!isBehindRemote(sourceBranch, fromBranch)) {
-    out.success(`Already up to date with origin/${fromBranch}`);
+    out.success(t("sync.alreadyUpToDate", { branch: fromBranch }));
     return;
   }
 
   const commits = getBehindCommits(sourceBranch, fromBranch);
   out.blank();
-  console.log(chalk.yellow(`New commits on origin/${fromBranch} (${commits.length}):`));
+  console.log(chalk.yellow(t("sync.newCommits", { branch: fromBranch, count: commits.length })));
   for (const c of commits) console.log(`  ${chalk.dim(c)}`);
   out.blank();
 
   if (!opts.yes) {
     const proceed = await confirmAction(
-      `${opts.rebase ? "Rebase" : "Merge"} origin/${fromBranch} into ${sourceBranch}?`, true
+      opts.rebase
+        ? t("sync.rebaseConfirm", { from: fromBranch, into: sourceBranch })
+        : t("sync.mergeConfirm", { from: fromBranch, into: sourceBranch }),
+      true
     );
-    if (!proceed) { console.log(chalk.dim("Aborted.")); return; }
+    if (!proceed) { console.log(chalk.dim(t("general.aborted"))); return; }
   }
 
   if (opts.rebase) {
-    spinner = startSpinner(`Rebasing onto origin/${fromBranch}`);
+    spinner = startSpinner(t("sync.rebasing", { branch: fromBranch }));
     try {
       execSync(`git rebase origin/${fromBranch}`, { stdio: "pipe" });
-      succeed(spinner, `Rebased ${sourceBranch} onto origin/${fromBranch}`);
+      succeed(spinner, t("sync.rebased", { branch: sourceBranch, from: fromBranch }));
     } catch {
-      fail(spinner, "Rebase conflicts detected");
-      out.error("Resolve conflicts, then run 'git rebase --continue'.");
+      fail(spinner, t("sync.rebaseConflicts"));
+      out.error(t("sync.resolveRebase"));
     }
   } else {
-    spinner = startSpinner(`Merging origin/${fromBranch} into ${sourceBranch}`);
+    spinner = startSpinner(t("sync.merging", { from: fromBranch, into: sourceBranch }));
     const result = mergeBranch(`origin/${fromBranch}`);
     if (result.hasConflicts) {
-      fail(spinner, `${result.conflictedFiles.length} conflict(s)`);
+      fail(spinner, t("sync.mergeConflicts", { count: result.conflictedFiles.length }));
       for (const f of result.conflictedFiles) console.log(`  ${chalk.red(f)}`);
       out.blank();
-      console.log(chalk.yellow("Resolve conflicts, then commit. Run 'gx sync' again to verify."));
+      console.log(chalk.yellow(t("sync.resolveMerge")));
     } else {
-      succeed(spinner, `Merged origin/${fromBranch} into ${sourceBranch}`);
+      succeed(spinner, t("sync.merged", { from: fromBranch, into: sourceBranch }));
     }
   }
 }

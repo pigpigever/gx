@@ -1,11 +1,12 @@
 import { Command } from "commander";
 import { getGitContext, isMergeInProgress, isOnGxMergeBranch } from "../lib/git.js";
 import { listOpenPRs, isGhAuthenticated } from "../lib/github.js";
+import { t } from "../lib/i18n.js";
 import * as out from "../lib/output.js";
 
 export function statusCommand(): Command {
   const cmd = new Command("status")
-    .description("Show open PRs and merge state for the current repo")
+    .description(t("status.description"))
     .action(async () => {
       try {
         const ctx = getGitContext();
@@ -13,7 +14,7 @@ export function statusCommand(): Command {
         out.blank();
 
         if (!isGhAuthenticated()) {
-          out.warning("Not authenticated. PR status may be incomplete.");
+          out.warning(t("status.notAuth"));
         } else {
           const prs = listOpenPRs(ctx.owner, ctx.repo);
           for (const pr of prs) {
@@ -24,10 +25,10 @@ export function statusCommand(): Command {
 
         if (isMergeInProgress()) {
           if (isOnGxMergeBranch()) {
-            out.warning(`Merge in progress on ${ctx.currentBranch}`);
-            console.log(`   gx merge --continue  |  gx merge --abort`);
+            out.warning(t("status.mergeInProgressOn", { branch: ctx.currentBranch }));
+            console.log(`   ${t("status.mergeContinueHint")}`);
           } else {
-            out.warning(`Merge in progress on ${ctx.currentBranch}`);
+            out.warning(t("status.mergeInProgressOn", { branch: ctx.currentBranch }));
           }
           out.blank();
         }

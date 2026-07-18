@@ -1,4 +1,5 @@
 import { checkbox, confirm, input } from "@inquirer/prompts";
+import { t } from "./i18n.js";
 
 // ── Target selection ──
 
@@ -23,10 +24,10 @@ export async function selectTargets(
   }));
 
   const selected = await checkbox({
-    message: "Select target branches to PR into:",
+    message: t("interactor.selectTargets"),
     choices,
     pageSize: 10,
-    instructions: "(space to toggle, enter to confirm)",
+    instructions: t("interactor.checkboxInstructions"),
   });
 
   return selected;
@@ -64,10 +65,10 @@ export async function promptForConfig(
   }));
 
   const selected = await checkbox({
-    message: "Select default target branches:",
+    message: t("interactor.selectDefaultTargets"),
     choices,
     pageSize: 10,
-    instructions: "(space to toggle, enter to confirm)",
+    instructions: t("interactor.checkboxInstructions"),
   });
 
   return selected;

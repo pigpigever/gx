@@ -104,3 +104,16 @@ export function configExists(): boolean {
 export function getConfigPath(): string {
   return CONFIG_PATH;
 }
+
+// ── Language ──
+
+export function getLanguage(): string {
+  const config = loadConfig();
+  return config.language || "en";
+}
+
+export function setLanguage(lang: string): void {
+  const config = loadConfig();
+  config.language = lang;
+  saveConfig(config);
+}

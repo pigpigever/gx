@@ -16,20 +16,21 @@ import { isGhAuthenticated, checkExistingPR, createPR } from "../lib/github.js";
 import { selectTargets, promptForConfig, confirmAction } from "../lib/interactor.js";
 import { branchToTitle, generateBody } from "../lib/formatter.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { t } from "../lib/i18n.js";
 import type { PRResult } from "../types.js";
 import * as out from "../lib/output.js";
 
 export function prCommand(): Command {
   const cmd = new Command("pr")
-    .description("Create PRs to multiple target branches")
-    .option("-b, --branch <name>", "Source branch (default: current branch)")
-    .option("-a, --all", "Skip selection, PR to all configured targets")
-    .option("-t, --targets <list>", "Comma-separated target branches (override config)")
-    .option("--title <text>", "PR title override")
-    .option("--body <text>", "PR body override")
-    .option("--draft", "Create as draft PRs")
-    .option("--dry-run", "Show what would be done without creating PRs")
-    .option("-y, --yes", "Skip confirmation prompts")
+    .description(t("pr.description"))
+    .option("-b, --branch <name>", t("pr.optionBranch"))
+    .option("-a, --all", t("pr.optionAll"))
+    .option("-t, --targets <list>", t("pr.optionTargets"))
+    .option("--title <text>", t("pr.optionTitle"))
+    .option("--body <text>", t("pr.optionBody"))
+    .option("--draft", t("pr.optionDraft"))
+    .option("--dry-run", t("pr.optionDryRun"))
+    .option("-y, --yes", t("pr.optionYes"))
     .action(async (opts) => {
       try {
         await runPr(opts);
@@ -50,43 +51,39 @@ async function runPr(opts: any): Promise<void> {
   out.blank();
 
   // ── Pre-flight checks ──
-  const spinner = startSpinner("Running pre-flight checks");
+  const spinner = startSpinner(t("pr.preflight"));
 
   if (!isGhAuthenticated()) {
-    fail(spinner, "GitHub authentication failed");
-    throw new Error(
-      "Not authenticated with GitHub. Run 'gh auth login' or set GITHUB_TOKEN."
-    );
+    fail(spinner, t("pr.preflightFailed"));
+    throw new Error(t("pr.authError"));
   }
 
   const repoConfig = getRepoConfig(ctx.owner, ctx.repo);
   const configuredTargets = repoConfig?.targets ?? [];
 
   if (configuredTargets.includes(sourceBranch)) {
-    fail(spinner, "Invalid source branch");
-    throw new Error(
-      `Source branch '${sourceBranch}' is also a target. Switch to a feature branch.`
-    );
+    fail(spinner, t("pr.invalidSource"));
+    throw new Error(t("pr.sourceIsTarget", { source: sourceBranch }));
   }
 
   if (hasUnpushedCommits(sourceBranch)) {
-    succeed(spinner, "Pre-flight checks done (unpushed commits detected)");
+    succeed(spinner, t("pr.preflightUnpushed"));
   } else {
-    succeed(spinner, "Pre-flight checks passed");
+    succeed(spinner, t("pr.preflightPassed"));
   }
 
   if (hasUnpushedCommits(sourceBranch)) {
     if (!opts.yes) {
       const proceed = await confirmAction(
-        `Branch '${sourceBranch}' has unpushed commits. Continue anyway?`,
+        t("pr.unpushedConfirm", { branch: sourceBranch }),
         false
       );
       if (!proceed) {
-        console.log(chalk.dim("Aborted."));
+        console.log(chalk.dim(t("general.aborted")));
         return;
       }
     } else {
-      out.warning(`Branch '${sourceBranch}' has unpushed commits — PR creation may fail.`);
+      out.warning(t("pr.unpushedWarn", { branch: sourceBranch }));
     }
   }
 
@@ -95,29 +92,26 @@ async function runPr(opts: any): Promise<void> {
 
   if (opts.targets) {
     targets = opts.targets.split(",").map((t: string) => t.trim()).filter(Boolean);
-    out.info(`Using CLI-specified targets: ${targets.join(", ")}`);
+    out.info(t("pr.usingCliTargets", { targets: targets.join(", ") }));
   } else if (configuredTargets.length === 0) {
-    out.warning("No targets configured for this repo.");
+    out.warning(t("pr.noTargets"));
     const remoteBranches = getRemoteBranches().filter((b) => b !== sourceBranch);
 
     if (remoteBranches.length === 0) {
-      throw new Error("No remote branches found to use as targets.");
+      throw new Error(t("pr.noRemoteBranches"));
     }
 
-    const save = await confirmAction(
-      "Set up target configuration for this repo?",
-      true
-    );
+    const save = await confirmAction(t("pr.setupConfig"), true);
 
     if (save) {
       out.blank();
       const selected = await promptForConfig(remoteBranches);
       if (selected.length > 0) {
         setTargets(ctx.owner, ctx.repo, selected);
-        out.success(`Saved ${selected.length} targets.`);
+        out.success(t("pr.savedTargets", { count: selected.length }));
         targets = selected;
       } else {
-        console.log(chalk.yellow("No targets selected. Exiting."));
+        console.log(chalk.yellow(t("pr.noTargetsSelected")));
         return;
       }
     } else {
@@ -125,29 +119,29 @@ async function runPr(opts: any): Promise<void> {
     }
   } else if (opts.all) {
     targets = configuredTargets;
-    out.info(`Using all configured targets: ${targets.join(", ")}`);
+    out.info(t("pr.usingAllTargets", { targets: targets.join(", ") }));
   } else {
     out.blank();
     const hints = new Map<string, string>();
-    const hintSpinner = startSpinner("Checking target branches");
-    for (const t of configuredTargets) {
-      const existing = checkExistingPR(ctx.owner, ctx.repo, sourceBranch, t);
+    const hintSpinner = startSpinner(t("pr.checkingTargets"));
+    for (const branch of configuredTargets) {
+      const existing = checkExistingPR(ctx.owner, ctx.repo, sourceBranch, branch);
       if (existing) {
-        hints.set(t, `PR #${existing.number} already exists — will skip`);
-      } else if (!branchExistsOnRemote(t)) {
-        hints.set(t, chalk.red("branch not found on remote"));
-      } else if (!hasDiff(sourceBranch, t)) {
-        hints.set(t, "no diff — PR will be empty");
+        hints.set(branch, t("pr.existingPrHint", { number: existing.number }));
+      } else if (!branchExistsOnRemote(branch)) {
+        hints.set(branch, chalk.red(t("pr.notFoundHint")));
+      } else if (!hasDiff(sourceBranch, branch)) {
+        hints.set(branch, t("pr.noDiffHint"));
       } else {
-        hints.set(t, "ready");
+        hints.set(branch, t("pr.readyHint"));
       }
     }
-    succeed(hintSpinner, "Target branches checked");
+    succeed(hintSpinner, t("pr.targetsChecked"));
     targets = await selectTargets(configuredTargets, hints);
   }
 
   if (targets.length === 0) {
-    console.log(chalk.yellow("\nNo target branches selected. Exiting."));
+    console.log(chalk.yellow(`\n${t("pr.noTargetsChosen")}`));
     return;
   }
 
@@ -155,18 +149,18 @@ async function runPr(opts: any): Promise<void> {
   const validTargets: string[] = [];
   const skippedTargets: PRResult[] = [];
 
-  for (const t of targets) {
-    if (!branchExistsOnRemote(t)) {
-      out.warning(`${t} — branch not found on remote, skipping`);
+  for (const target of targets) {
+    if (!branchExistsOnRemote(target)) {
+      out.warning(`${target} — ${t("pr.branchNotFoundSkip")}, skipping`);
       skippedTargets.push({
-        target: t,
+        target,
         status: "skipped",
         url: "",
         number: null,
-        error: "branch not found on remote",
+        error: t("pr.branchNotFoundSkip"),
       });
     } else {
-      validTargets.push(t);
+      validTargets.push(target);
     }
   }
 
@@ -178,36 +172,36 @@ async function runPr(opts: any): Promise<void> {
   // ── Dry run ──
   if (opts.dryRun) {
     out.blank();
-    console.log(chalk.bold.cyan("[DRY RUN] Would create PRs:"));
+    console.log(chalk.bold.cyan(`${t("general.dryRunPrefix")} ${t("pr.dryRunWouldCreate")}`));
     out.blank();
-    for (const t of validTargets) {
+    for (const target of validTargets) {
       const title = opts.title || branchToTitle(sourceBranch);
       console.log(
-        `  ${chalk.dim("→")} ${chalk.bold(sourceBranch)} ${chalk.dim("→")} ${chalk.bold(t)}  "${title}"`
+        `  ${chalk.dim("→")} ${chalk.bold(sourceBranch)} ${chalk.dim("→")} ${chalk.bold(target)}  "${title}"`
       );
     }
     out.blank();
-    console.log(chalk.dim(`Total: ${validTargets.length} PR(s)`));
+    console.log(chalk.dim(t("general.totalPrs", { count: validTargets.length })));
     return;
   }
 
   // ── Confirm ──
   if (!opts.yes) {
     out.blank();
-    console.log(chalk.bold(`Ready to create ${validTargets.length} PR(s):`));
-    for (const t of validTargets) {
-      console.log(`  ${chalk.dim("→")} ${sourceBranch} → ${t}`);
+    console.log(chalk.bold(t("pr.readyToCreate", { count: validTargets.length })));
+    for (const target of validTargets) {
+      console.log(`  ${chalk.dim("→")} ${sourceBranch} → ${target}`);
     }
     out.blank();
-    const proceed = await confirmAction("Proceed?", true);
+    const proceed = await confirmAction(t("general.proceed"), true);
     if (!proceed) {
-      console.log(chalk.dim("Aborted."));
+      console.log(chalk.dim(t("general.aborted")));
       return;
     }
   }
 
   // ── Create PRs in parallel with spinner ──
-  const createSpinner = startSpinner(`Creating ${validTargets.length} PR(s)`);
+  const createSpinner = startSpinner(t("pr.creating", { count: validTargets.length }));
 
   const results: PRResult[] = [...skippedTargets];
 
@@ -219,7 +213,7 @@ async function runPr(opts: any): Promise<void> {
         status: "skipped",
         url: existing.url,
         number: existing.number,
-        error: `PR already exists: #${existing.number}`,
+        error: `${t("pr.existingPrHint", { number: existing.number })}`,
       };
     }
 
@@ -249,9 +243,9 @@ async function runPr(opts: any): Promise<void> {
   const errors = prResults.filter((r) => r.status === "error").length;
 
   if (errors > 0) {
-    fail(createSpinner, `${created} created, ${skipped} skipped, ${errors} failed`);
+    fail(createSpinner, t("pr.createdSkippedFailed", { created, skipped, failed: errors }));
   } else {
-    succeed(createSpinner, `${created} created, ${skipped} skipped`);
+    succeed(createSpinner, t("pr.createdSkipped", { created, skipped }));
   }
 
   // ── Print results ──

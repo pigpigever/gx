@@ -4,13 +4,14 @@ import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch
 import { getRepoTargets } from "../lib/config-store.js";
 import { confirmAction } from "../lib/interactor.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
+import { t } from "../lib/i18n.js";
 import * as out from "../lib/output.js";
 
 export function cleanupCommand(): Command {
   const cmd = new Command("cleanup")
-    .description("Delete branches that have been merged into target branches")
-    .option("--dry-run", "Show what would be deleted without deleting")
-    .option("-y, --yes", "Skip confirmation")
+    .description(t("cleanup.description"))
+    .option("--dry-run", t("cleanup.optionDryRun"))
+    .option("-y, --yes", t("cleanup.optionYes"))
     .action(async (opts) => {
       try { await runCleanup(opts); }
       catch (err: any) { out.error(err.message); process.exit(1); }
@@ -26,23 +27,23 @@ async function runCleanup(opts: any): Promise<void> {
   out.printContext(ctx.owner, ctx.repo, ctx.currentBranch);
   out.blank();
 
-  const spinner = startSpinner(`Scanning branches merged into ${targets.join(", ")}`);
+  const spinner = startSpinner(t("cleanup.scanning", { targets: targets.join(", ") }));
   const branches = getMergedBranches(targets);
 
   if (branches.length === 0) {
-    succeed(spinner, "No merged branches found");
+    succeed(spinner, t("cleanup.noMerged"));
     return;
   }
-  succeed(spinner, `Found ${branches.length} merged branches`);
+  succeed(spinner, t("cleanup.foundMerged", { count: branches.length }));
 
   out.blank();
-  console.log(chalk.bold("Merged branches (safe to delete):"));
+  console.log(chalk.bold(t("cleanup.mergedHeader")));
   out.blank();
 
   for (const b of branches) {
     const tags = [
-      b.isGxTemp ? chalk.yellow(" [gx]") : "",
-      b.isRemote ? chalk.dim(" [remote]") : "",
+      b.isGxTemp ? chalk.yellow(t("cleanup.tagGx")) : "",
+      b.isRemote ? chalk.dim(t("cleanup.tagRemote")) : "",
     ].join("");
     console.log(`  ${chalk.red("✗")} ${chalk.bold(b.name)} → ${chalk.dim(b.mergedInto)}${tags}`);
   }
@@ -50,7 +51,7 @@ async function runCleanup(opts: any): Promise<void> {
   out.blank();
 
   if (opts.dryRun) {
-    console.log(chalk.bold.cyan(`[DRY RUN] Would delete ${branches.length} branches.`));
+    console.log(chalk.bold.cyan(`${t("general.dryRunPrefix")} ${t("cleanup.dryRunWouldDelete", { count: branches.length })}`));
     out.blank();
     return;
   }
@@ -60,28 +61,29 @@ async function runCleanup(opts: any): Promise<void> {
 
   if (!opts.yes) {
     const proceed = await confirmAction(
-      `Delete ${localOnly.length} local and ${remoteOnly.length} remote branches?`, false
+      t("cleanup.deleteConfirm", { local: localOnly.length, remote: remoteOnly.length }),
+      false
     );
-    if (!proceed) { console.log(chalk.dim("Aborted.")); return; }
+    if (!proceed) { console.log(chalk.dim(t("general.aborted"))); return; }
   }
 
   out.blank();
 
   const uniqueRemotes = Array.from(new Set(remoteOnly.map((b) => b.name)));
   for (const name of uniqueRemotes) {
-    const s = startSpinner(`Deleting remote: ${name}`);
-    try { deleteRemoteBranch(name); succeed(s, `Deleted remote: ${name}`); }
-    catch { fail(s, `Failed to delete remote: ${name}`); }
+    const s = startSpinner(t("cleanup.deletingRemote", { name }));
+    try { deleteRemoteBranch(name); succeed(s, t("cleanup.deletedRemote", { name })); }
+    catch { fail(s, t("cleanup.deleteRemoteFailed", { name })); }
   }
 
   for (const b of localOnly) {
-    if (b.name === ctx.currentBranch) { out.warning(`Skipping current branch: ${b.name}`); continue; }
-    const s = startSpinner(`Deleting local: ${b.name}`);
-    try { deleteLocalBranch(b.name); succeed(s, `Deleted local: ${b.name}`); }
-    catch { fail(s, `Failed to delete local: ${b.name}`); }
+    if (b.name === ctx.currentBranch) { out.warning(t("cleanup.skippingCurrent", { name: b.name })); continue; }
+    const s = startSpinner(t("cleanup.deletingLocal", { name: b.name }));
+    try { deleteLocalBranch(b.name); succeed(s, t("cleanup.deletedLocal", { name: b.name })); }
+    catch { fail(s, t("cleanup.deleteLocalFailed", { name: b.name })); }
   }
 
   out.blank();
-  out.success("Cleanup complete.");
+  out.success(t("cleanup.complete"));
   out.blank();
 }

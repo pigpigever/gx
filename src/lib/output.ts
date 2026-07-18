@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { t } from "./i18n.js";
 import type { PRResult, PROverview } from "../types.js";
 
 // ── General ──
@@ -42,15 +43,15 @@ export function printContext(
   repo: string,
   sourceBranch: string
 ): void {
-  console.log(chalk.bold(`\n📦 Repo:   ${chalk.cyan(`${owner}/${repo}`)}`));
-  console.log(chalk.bold(`📤 Source: ${chalk.green(sourceBranch)}`));
+  console.log(chalk.bold(`\n📦 ${t("context.repo", { repo: `${owner}/${repo}` })}`));
+  console.log(chalk.bold(`📤 ${t("context.source", { branch: sourceBranch })}`));
 }
 
 // ── PR results ──
 
 export function printPRResults(results: PRResult[]): void {
   blank();
-  console.log(chalk.bold("Results:"));
+  console.log(chalk.bold(t("pr.results")));
   blank();
 
   for (const r of results) {
@@ -60,11 +61,11 @@ export function printPRResults(results: PRResult[]): void {
       );
     } else if (r.status === "skipped") {
       console.log(
-        `  ${chalk.dim("⊘")} ${chalk.bold(r.target.padEnd(12))} ${chalk.dim(`skipped (${r.error})`)}`
+        `  ${chalk.dim("⊘")} ${chalk.bold(r.target.padEnd(12))} ${chalk.dim(t("pr.skippedReason", { reason: r.error }))}`
       );
     } else {
       console.log(
-        `  ${chalk.red("✗")} ${chalk.bold(r.target.padEnd(12))} ${chalk.red(`error: ${r.error}`)}`
+        `  ${chalk.red("✗")} ${chalk.bold(r.target.padEnd(12))} ${chalk.red(t("pr.errorPrefix", { msg: r.error }))}`
       );
     }
   }
@@ -76,7 +77,7 @@ export function printPRResults(results: PRResult[]): void {
 
   console.log(
     chalk.bold(
-      `Done. ${chalk.green(`${created} created`)}, ${chalk.yellow(`${skipped} skipped`)}, ${chalk.red(`${errors} errors`)}`
+      t("pr.resultSummary", { created, skipped, errors })
     )
   );
   blank();
@@ -86,23 +87,23 @@ export function printPRResults(results: PRResult[]): void {
 
 export function printStatus(prs: PROverview[], mergeInProgress: boolean): void {
   if (prs.length === 0) {
-    console.log(chalk.dim("  No open PRs found."));
+    console.log(chalk.dim(`  ${t("status.noOpenPrs")}`));
     blank();
     if (mergeInProgress) {
       console.log(
-        chalk.yellow("  ⚠ Merge in progress. Run gx merge --continue or --abort.")
+        chalk.yellow(`  ⚠ ${t("status.mergeInProgressWarn")}`)
       );
     }
     return;
   }
 
-  console.log(chalk.bold(`\nOpen PRs (${prs.length}):`));
+  console.log(chalk.bold(`\n${t("status.openPrs", { count: prs.length })}`));
   blank();
 
   for (const pr of prs) {
     const num = chalk.dim(`#${String(pr.number).padStart(3)}`);
     const ci = ciIcon(pr.ciStatus);
-    const draft = pr.draft ? chalk.dim(" [draft]") : "";
+    const draft = pr.draft ? chalk.dim(t("status.draftTag")) : "";
     const author = pr.author === "me" ? "" : chalk.dim(` @${pr.author}`);
 
     console.log(
@@ -115,7 +116,7 @@ export function printStatus(prs: PROverview[], mergeInProgress: boolean): void {
 
   if (mergeInProgress) {
     console.log(
-      chalk.yellow("  ⚠ Merge in progress — run gx merge --continue or --abort")
+      chalk.yellow(`  ⚠ ${t("status.mergeInProgressWarn")}`)
     );
     blank();
   }
@@ -137,5 +138,5 @@ function ciIcon(status: string): string {
 // ── Step indicator ──
 
 export function step(current: number, total: number, description: string): void {
-  console.log(chalk.dim(`\nStep ${current}/${total}:`), chalk.bold(description));
+  console.log(chalk.dim(`\n${t("step.indicator", { current, total })}`), chalk.bold(description));
 }
