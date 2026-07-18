@@ -108,6 +108,10 @@ const en: LocaleStrings = {
     continueCmd: "gx merge --continue",
     abortCmd: "gx merge --abort",
 
+    conflictsResolvedPrompt: "Have you resolved all conflicts?",
+    conflictsStillUnresolved: "Conflicts still unresolved — see files above.",
+    resolveHint: "Resolve conflicts in your editor, then run 'gx merge --continue' again.",
+
     pushing: "Pushing temp branch",
     pushed: "Pushed {{name}}",
 
