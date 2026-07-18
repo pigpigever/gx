@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.8] — 2026-07-18
+
+### Added
+- Homebrew formula (`git-extended`) to avoid name conflict with homebrew-core's deprecated `gx`
+- Install: `brew tap pigpigever/gx https://github.com/pigpigever/gx && brew install git-extended`
+
 ## [1.1.7] — 2026-07-18
 
 ### Fixed
