@@ -189,7 +189,8 @@ export function getMergedBranches(targets: string[]): BranchToClean[] {
 
   // Get all remote branches that have been merged into any target
   for (const branch of localBranches) {
-    if (branch === "main" || branch === "master" || branch === "develop") continue;
+    // Skip protected target branches
+    if (targets.includes(branch) || branch === "main" || branch === "master") continue;
 
     for (const target of targets) {
       const merged = exec(`git branch --merged origin/${target} --format='%(refname:short)'`);
