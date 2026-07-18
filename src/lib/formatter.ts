@@ -1,4 +1,4 @@
-import { getRecentCommits } from "./git.js";
+import { getUniqueCommits } from "./git.js";
 import { t } from "./i18n.js";
 
 const TITLE_PREFIXES: Record<string, string> = {
@@ -32,21 +32,85 @@ export function branchToTitle(branch: string): string {
   return branch;
 }
 
+// ── Commit parsing ──
+
+interface ParsedCommit {
+  hash: string;
+  type: string;
+  scope: string;
+  message: string;
+}
+
+function parseCommit(line: string): ParsedCommit {
+  const match = line.match(/^(\S+)\s+(.+)$/);
+  const hash = match?.[1] ?? "";
+  const fullMsg = match?.[2] ?? line;
+
+  const ccMatch = fullMsg.match(/^(\w+)(?:\((.+?)\))?:\s*(.+)/);
+  if (ccMatch) {
+    return { hash, type: ccMatch[1], scope: ccMatch[2] ?? "", message: ccMatch[3] };
+  }
+  return { hash, type: "other", scope: "", message: fullMsg };
+}
+
+function isFeature(type: string): boolean {
+  return type === "feat" || type === "feature";
+}
+
+function isBugfix(type: string): boolean {
+  return type === "fix" || type === "bugfix" || type === "hotfix";
+}
+
+// ── Body generation ──
+
 export function generateBody(
   sourceBranch: string,
-  _targetBranch: string
+  targetBranch: string
 ): string {
-  const commits = getRecentCommits(sourceBranch, 5);
-  const summary = commits.length > 0
-    ? commits.map((c) => `- ${c}`).join("\n")
-    : t("formatter.noRecentCommits");
+  // Only commits unique to the source branch (not on target)
+  const rawCommits = getUniqueCommits(sourceBranch, targetBranch);
 
-  return [
-    t("formatter.prGeneratedBy"),
-    ``,
-    `**${t("formatter.source")}** \`${sourceBranch}\``,
-    ``,
-    `## ${t("formatter.recentCommits")}`,
-    summary,
-  ].join("\n");
+  if (rawCommits.length === 0) {
+    return [
+      `## ${t("formatter.summary")}`,
+      t("formatter.noUniqueCommits"),
+      ``,
+      `${t("formatter.source")}: \`${sourceBranch}\` → \`${targetBranch}\``,
+    ].join("\n");
+  }
+
+  const commits = rawCommits.map(parseCommit);
+  const features = commits.filter((c) => isFeature(c.type));
+  const fixes = commits.filter((c) => isBugfix(c.type));
+  const others = commits.filter((c) => !isFeature(c.type) && !isBugfix(c.type));
+
+  // Build summary line
+  const summaryParts: string[] = [];
+  if (features.length > 0) summaryParts.push(`${t("formatter.featTag")}: ${features.map((c) => c.message).join(", ")}`);
+  if (fixes.length > 0) summaryParts.push(`${t("formatter.fixTag")}: ${fixes.map((c) => c.message).join(", ")}`);
+  const summary = (summaryParts.join("; ") || commits[0]?.message) ?? "-";
+
+  const sections: string[] = [];
+  sections.push(`## ${t("formatter.summary")}`);
+  sections.push(summary);
+  sections.push("");
+
+  if (features.length > 0) {
+    sections.push(`### ${t("formatter.features")}`);
+    for (const c of features) sections.push(`- ${c.hash.slice(0, 7)} ${c.message}`);
+    sections.push("");
+  }
+  if (fixes.length > 0) {
+    sections.push(`### ${t("formatter.bugfixes")}`);
+    for (const c of fixes) sections.push(`- ${c.hash.slice(0, 7)} ${c.message}`);
+    sections.push("");
+  }
+  if (others.length > 0) {
+    sections.push(`### ${t("formatter.other")}`);
+    for (const c of others) sections.push(`- ${c.hash.slice(0, 7)} ${c.message}`);
+    sections.push("");
+  }
+
+  sections.push(`${t("formatter.source")}: \`${sourceBranch}\` → \`${targetBranch}\``);
+  return sections.join("\n");
 }
