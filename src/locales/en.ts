@@ -291,7 +291,7 @@ const en: LocaleStrings = {
     optionYes: "Skip confirmation",
     optionMine: "Only show branches created by you",
     title: "GX Temp Branches",
-    scanning: "Scanning for temp branches (merge/*)",
+    scanning: "Scanning for temp branches (merge/*, temp/*)",
     noneFound: "No temp branches found",
     foundCount: "Found {{count}} temp branches",
     fetchingPrs: "Fetching PR info",
