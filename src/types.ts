@@ -18,7 +18,17 @@ export interface RepoConfig {
 export interface GxConfig {
   version: number;
   language?: string;
+  commit?: CommitConfig;
   repos: Record<string, RepoConfig>; // "owner/repo" → RepoConfig
+}
+
+export interface CommitConfig {
+  ai?: {
+    provider?: string;
+    model?: string;
+    endpoint?: string;
+    apiKey?: string;
+  };
 }
 
 // ── PR operations ──

@@ -11,6 +11,7 @@ import { configCommand } from "./commands/config.command.js";
 import { statusCommand } from "./commands/status.command.js";
 import { syncCommand } from "./commands/sync.command.js";
 import { cleanupCommand } from "./commands/cleanup.command.js";
+import { commitCommand } from "./commands/commit.command.js";
 
 // Register locales (lazy-loaded)
 registerLocale("en", () => import("./locales/en.js"));
@@ -36,6 +37,7 @@ async function main() {
   program.addCommand(statusCommand());
   program.addCommand(syncCommand());
   program.addCommand(cleanupCommand());
+  program.addCommand(commitCommand());
 
   // Default behavior: if no args, show status
   program.action(() => {

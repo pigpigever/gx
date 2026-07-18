@@ -201,6 +201,36 @@ const en: LocaleStrings = {
     unknownLang: "Unknown language: {{lang}}. Available: {{available}}",
   },
 
+  commit: {
+    description: "Smart conventional commit — interactive or AI-powered",
+    optionMessage: "Commit message (skip interactive)",
+    optionAi: "Use AI to generate commit message",
+    optionDryRun: "Show what would be committed",
+
+    noStaged: "No staged changes. Use 'git add' to stage files first.",
+    staged: "Staged",
+
+    detected: "Detected",
+    fromBranch: "from branch",
+
+    selectType: "Commit type:",
+    scopePrompt: "Scope (optional):",
+    messagePrompt: "Message:",
+    messageRequired: "Message is required",
+    bodyPrompt: "Add a body?",
+    bodyInput: "Body (optional):",
+
+    committed: "Committed: {{msg}}",
+
+    aiGenerating: "Generating commit message with AI",
+    aiGenerated: "AI message generated",
+    aiConfirm: "Accept this message?",
+    aiNoKey: "No AI API key configured. Set GX_AI_KEY env var or commit.ai.apiKey in config.",
+    aiDiffTruncated: "Diff is large, truncating for AI prompt.",
+    aiFailed: "AI generation failed",
+    aiFallback: "Falling back to interactive mode",
+  },
+
   context: {
     repo: "Repo:   {{repo}}",
     source: "Source: {{branch}}",
@@ -222,8 +252,8 @@ const en: LocaleStrings = {
 
   home: {
     helpHint: "Run 'gx --help' to see available commands.",
-    quickActions: "Quick actions: gx pr | gx status | gx sync | gx merge",
-    examples: "Examples:\n  $ gx pr                          Create PRs (interactive target selection)\n  $ gx pr --all                    PR to all configured targets\n  $ gx pr --draft --dry-run        Dry-run draft PRs\n  $ gx merge --into develop        Safe merge via temp branch\n  $ gx merge --continue            Continue after resolving conflicts\n  $ gx merge --abort               Abort merge in progress\n  $ gx status                      Show open PRs and merge state\n  $ gx sync                        Sync current branch with base\n  $ gx cleanup --dry-run           Preview branches to delete\n  $ gx config add main             Add target branch for current repo\n  $ gx config init                 Interactive config setup",
+    quickActions: "Quick actions: gx pr | gx status | gx sync | gx merge | gx commit",
+    examples: "Examples:\n  $ gx pr                          Create PRs (interactive target selection)\n  $ gx pr --all                    PR to all configured targets\n  $ gx pr --draft --dry-run        Dry-run draft PRs\n  $ gx merge --into develop        Safe merge via temp branch\n  $ gx merge --continue            Continue after resolving conflicts\n  $ gx merge --abort               Abort merge in progress\n  $ gx status                      Show open PRs and merge state\n  $ gx sync                        Sync current branch with base\n  $ gx cleanup --dry-run           Preview branches to delete\n  $ gx commit                      Smart conventional commit\n  $ gx commit --ai                 AI-generated commit message\n  $ gx config add main             Add target branch for current repo\n  $ gx config init                 Interactive config setup",
     description: "Git Extended — batch PRs, safe merge, and git workflow automation",
   },
 
