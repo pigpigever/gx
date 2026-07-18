@@ -24,3 +24,4 @@ export function warnSpinner(spinner: Ora, text?: string): Ora {
 export function updateText(spinner: Ora, text: string): void {
   spinner.text = text;
 }
+// test-a helper
