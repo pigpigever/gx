@@ -251,3 +251,18 @@ function parseCIStatus(
   if (allPassed) return "passing";
   return "unknown";
 }
+
+// ── PR conflict check ──
+
+export function checkPRConflicts(owner: string, repo: string, number: number): boolean {
+  try {
+    const json = execSync(
+      `gh pr view ${number} --repo "${owner}/${repo}" --json mergeable`,
+      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
+    ).trim();
+    const data = JSON.parse(json);
+    return data.mergeable === "CONFLICTING";
+  } catch {
+    return false;
+  }
+}

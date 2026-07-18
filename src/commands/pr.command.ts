@@ -13,7 +13,7 @@ import {
   setTargets,
   getRepoConfig,
 } from "../lib/config-store.js";
-import { isGhAuthenticated, checkExistingPR, createPR } from "../lib/github.js";
+import { isGhAuthenticated, checkExistingPR, createPR, checkPRConflicts } from "../lib/github.js";
 import { selectTargets, promptForConfig, confirmAction, selectSourceBranch } from "../lib/interactor.js";
 import { branchToTitle, generateBody } from "../lib/formatter.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
@@ -273,4 +273,31 @@ async function runPr(opts: any): Promise<void> {
 
   // ── Print results ──
   out.printPRResults(results);
+
+  // ── Conflict check ──
+  const createdResults = results.filter((r) => r.status === "created" && r.number);
+  if (createdResults.length > 0) {
+    const conflictSpinner = startSpinner(t("pr.checkingConflicts"));
+    const conflicts: PRResult[] = [];
+    for (const r of createdResults) {
+      if (r.number && checkPRConflicts(ctx.owner, ctx.repo, r.number)) {
+        conflicts.push(r);
+      }
+    }
+    if (conflicts.length > 0) {
+      fail(conflictSpinner, t("pr.conflictsFound", { count: conflicts.length }));
+      out.blank();
+      for (const r of conflicts) {
+        console.log(
+          chalk.yellow(`  ⚠ ${r.target}:`) + chalk.dim(` conflicts detected — run`)
+        );
+        console.log(
+          chalk.dim(`     gx merge --into ${r.target} --source ${sourceBranch}`)
+        );
+      }
+      out.blank();
+    } else {
+      succeed(conflictSpinner, t("pr.noConflicts"));
+    }
+  }
 }

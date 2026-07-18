@@ -64,9 +64,13 @@ const en: LocaleStrings = {
 
     results: "Results:",
     resultSummary: "{{created}} created, {{skipped}} skipped, {{errors}} errors",
-    skippedExisting: "skipped (PR already exists: #{{number}})",
+    skippedExisting: "existing PR",
     skippedReason: "skipped ({{reason}})",
     errorPrefix: "error: {{msg}}",
+
+    checkingConflicts: "Checking for merge conflicts",
+    conflictsFound: "{{count}} conflict(s) found",
+    noConflicts: "No conflicts detected",
   },
 
   merge: {
