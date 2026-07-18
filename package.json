@@ -9,6 +9,7 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsup src/index.ts --format esm --out-dir dist --clean",
+    "build:binary": "bun build --compile ./src/index.ts --outfile dist/gx",
     "dev": "tsx src/index.ts",
     "prepublishOnly": "npm run build"
   },

@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  npm-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish
+        if: ${{ !contains(github.ref, '-rc') }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+  binaries:
+    needs: [npm-package]
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            arch: darwin-arm64
+            target: aarch64-apple-darwin
+          - os: macos-13
+            arch: darwin-x64
+            target: x86_64-apple-darwin
+          - os: ubuntu-latest
+            arch: linux-x64
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            arch: linux-arm64
+            target: aarch64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build binary
+        run: |
+          bun build --compile --target=bun-${{ matrix.target }} ./src/index.ts --outfile gx-${{ matrix.arch }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gx-${{ matrix.arch }}
+          path: gx-${{ matrix.arch }}
+
+  release:
+    needs: [binaries]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: gx-*
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        run: shasum -a 256 gx-* > checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            gx-*
+            checksums.txt
+          generate_release_notes: true
