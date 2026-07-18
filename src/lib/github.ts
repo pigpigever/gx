@@ -251,3 +251,4 @@ function parseCIStatus(
   if (allPassed) return "passing";
   return "unknown";
 }
+// OLD version change — conflicts with main's escapeShell fix
