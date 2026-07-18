@@ -3,36 +3,36 @@
 To install gx via Homebrew:
 
 ```bash
-brew tap chentony/gx
+brew tap pigpigever/gx
 brew install gx
 ```
 
 ## Formula
 
 ```ruby
-# chentony/homebrew-gx/Formula/gx.rb
+# pigpigever/homebrew-gx/Formula/gx.rb
 class Gx < Formula
   desc "Batch PRs, safe merge, and git workflow automation"
-  homepage "https://github.com/chentony/gx"
+  homepage "https://github.com/pigpigever/gx"
   version "1.0.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/chentony/gx/releases/download/v#{version}/gx-darwin-arm64"
+      url "https://github.com/pigpigever/gx/releases/download/v#{version}/gx-darwin-arm64"
       sha256 "REPLACE_WITH_ACTUAL_SHA256"
     else
-      url "https://github.com/chentony/gx/releases/download/v#{version}/gx-darwin-x64"
+      url "https://github.com/pigpigever/gx/releases/download/v#{version}/gx-darwin-x64"
       sha256 "REPLACE_WITH_ACTUAL_SHA256"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/chentony/gx/releases/download/v#{version}/gx-linux-arm64"
+      url "https://github.com/pigpigever/gx/releases/download/v#{version}/gx-linux-arm64"
       sha256 "REPLACE_WITH_ACTUAL_SHA256"
     else
-      url "https://github.com/chentony/gx/releases/download/v#{version}/gx-linux-x64"
+      url "https://github.com/pigpigever/gx/releases/download/v#{version}/gx-linux-x64"
       sha256 "REPLACE_WITH_ACTUAL_SHA256"
     end
   end
