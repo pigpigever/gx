@@ -1,4 +1,4 @@
-import { checkbox, confirm, input } from "@inquirer/prompts";
+import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { t } from "./i18n.js";
 
 // ── Target selection ──
@@ -49,6 +49,25 @@ export async function promptInput(message: string, defaultValue?: string): Promi
     message,
     default: defaultValue,
   });
+}
+
+// ── Source branch selection ──
+
+export async function selectSourceBranch(
+  branches: string[]
+): Promise<string> {
+  const choices = branches.map((b) => ({
+    name: b,
+    value: b,
+  }));
+
+  const selected = await select({
+    message: t("interactor.selectSourceBranch"),
+    choices,
+    pageSize: 10,
+  });
+
+  return selected;
 }
 
 // ── Config init ──

@@ -13,7 +13,7 @@ import {
   getRepoConfig,
 } from "../lib/config-store.js";
 import { isGhAuthenticated, checkExistingPR, createPR } from "../lib/github.js";
-import { selectTargets, promptForConfig, confirmAction } from "../lib/interactor.js";
+import { selectTargets, promptForConfig, confirmAction, selectSourceBranch } from "../lib/interactor.js";
 import { branchToTitle, generateBody } from "../lib/formatter.js";
 import { startSpinner, succeed, fail } from "../lib/spinner.js";
 import { t } from "../lib/i18n.js";
@@ -45,7 +45,23 @@ export function prCommand(): Command {
 
 async function runPr(opts: any): Promise<void> {
   const ctx = getGitContext();
-  const sourceBranch = opts.branch || ctx.currentBranch;
+  let sourceBranch = opts.branch || ctx.currentBranch;
+
+  // If no explicit --branch and current is a target, let user pick a source
+  const repoConfig = getRepoConfig(ctx.owner, ctx.repo);
+  const configuredTargets = repoConfig?.targets ?? [];
+
+  if (!opts.branch && configuredTargets.includes(sourceBranch)) {
+    out.blank();
+    console.log(chalk.dim(t("pr.onTargetBranch", { branch: sourceBranch })));
+    const remoteBranches = getRemoteBranches()
+      .filter((b) => !configuredTargets.includes(b) && b !== "HEAD");
+    if (remoteBranches.length === 0) {
+      throw new Error(t("pr.noSourceBranches"));
+    }
+    out.blank();
+    sourceBranch = await selectSourceBranch(remoteBranches);
+  }
 
   out.printContext(ctx.owner, ctx.repo, sourceBranch);
   out.blank();
@@ -57,9 +73,6 @@ async function runPr(opts: any): Promise<void> {
     fail(spinner, t("pr.preflightFailed"));
     throw new Error(t("pr.authError"));
   }
-
-  const repoConfig = getRepoConfig(ctx.owner, ctx.repo);
-  const configuredTargets = repoConfig?.targets ?? [];
 
   if (configuredTargets.includes(sourceBranch)) {
     fail(spinner, t("pr.invalidSource"));

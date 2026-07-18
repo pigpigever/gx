@@ -48,6 +48,8 @@ const en: LocaleStrings = {
     noDiffHint: "no diff — PR will be empty",
 
     noTargetsChosen: "No target branches selected. Exiting.",
+    onTargetBranch: "You are on target branch '{{branch}}' — pick a source branch:",
+    noSourceBranches: "No feature branches found on remote to use as source.",
     branchNotFoundSkip: "branch not found on remote",
 
     dryRunWouldCreate: "Would create PRs:",
@@ -240,6 +242,7 @@ const en: LocaleStrings = {
   interactor: {
     selectTargets: "Select target branches to PR into:",
     selectDefaultTargets: "Select default target branches:",
+    selectSourceBranch: "Select source branch to PR from:",
     checkboxInstructions: "(space to toggle, enter to confirm)",
   },
 
