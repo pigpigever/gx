@@ -27,9 +27,9 @@
 ## 📦 Install
 
 ```bash
-# Homebrew (macOS/Linux)
-brew tap pigpigever/gx
-brew install gx
+# Homebrew
+brew tap pigpigever/gx https://github.com/pigpigever/gx
+brew install git-extended
 
 # npm / pnpm
 npm install -g gx
