@@ -163,3 +163,4 @@ repos:
 
 - Node.js ≥ 18 (npm/pnpm install) or none (Homebrew binary)
 - `gh` CLI authenticated (recommended) or `GITHUB_TOKEN` env var
+# test-b note
