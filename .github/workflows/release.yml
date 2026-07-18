@@ -30,16 +30,12 @@ jobs:
         include:
           - os: macos-14
             arch: darwin-arm64
-            target: aarch64-apple-darwin
           - os: macos-13
             arch: darwin-x64
-            target: x86_64-apple-darwin
           - os: ubuntu-latest
             arch: linux-x64
-            target: x86_64-unknown-linux-gnu
           - os: ubuntu-24.04-arm
             arch: linux-arm64
-            target: aarch64-unknown-linux-gnu
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +46,7 @@ jobs:
 
       - name: Build binary
         run: |
-          bun build --compile --target=bun-${{ matrix.target }} ./src/index.ts --outfile gx-${{ matrix.arch }}
+          bun build --compile ./src/index.ts --outfile gx-${{ matrix.arch }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
