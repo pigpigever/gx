@@ -28,8 +28,7 @@
 
 ```bash
 # Homebrew
-brew tap pigpigever/gx https://github.com/pigpigever/gx
-brew install git-extended
+brew install https://raw.githubusercontent.com/pigpigever/gx/main/Formula/git-extended.rb
 
 # npm / pnpm
 npm install -g gx
