@@ -92,22 +92,3 @@ export async function promptForConfig(
 
   return selected;
 }
-
-// ── Source branch selection ──
-
-export async function selectSourceBranch(
-  branches: string[]
-): Promise<string> {
-  const choices = branches.map((b) => ({
-    name: b,
-    value: b,
-  }));
-
-  const selected = await select({
-    message: t("interactor.selectSourceBranch"),
-    choices,
-    pageSize: 10,
-  });
-
-  return selected;
-}
