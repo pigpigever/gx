@@ -1,8 +1,8 @@
 import { Command } from "commander";
-import { getGitContext, isMergeInProgress, isOnGxMergeBranch } from "../lib/git.js";
-import { listOpenPRs, isGhAuthenticated } from "../lib/github.js";
-import { t } from "../lib/i18n.js";
-import * as out from "../lib/output.js";
+import { getGitContext, isMergeInProgress, isOnGxMergeBranch } from "@/lib/git.js";
+import { listOpenPRs, isGhAuthenticated } from "@/lib/github.js";
+import { t } from "@/lib/i18n.js";
+import * as out from "@/lib/output.js";
 
 export function statusCommand(): Command {
   const cmd = new Command("status")

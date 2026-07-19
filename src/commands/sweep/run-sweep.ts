@@ -1,60 +1,16 @@
-import { Command } from "commander";
 import { checkbox } from "@inquirer/prompts";
 import chalk from "chalk";
-import { execSync } from "node:child_process";
-import { getGitContext, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "../lib/git.js";
-import { getRepoTargets } from "../lib/config-store.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
-import { confirmAction } from "../lib/interactor.js";
-import { getPRsForBranch, type BranchPRInfo } from "../lib/github.js";
-import { t } from "../lib/i18n.js";
-import * as out from "../lib/output.js";
+import { getGitContext, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "@/lib/git.js";
+import { getRepoTargets } from "@/lib/config-store.js";
+import { startSpinner, succeed, fail } from "@/lib/spinner.js";
+import { confirmAction } from "@/lib/interactor.js";
+import { getPRsForBranch, type BranchPRInfo } from "@/lib/github.js";
+import { t } from "@/lib/i18n.js";
+import * as out from "@/lib/output.js";
+import { prStateIcon } from "@/commands/shared/pr-icons.js";
+import { getTempBranches, type TempBranch } from "./utils.js";
 
-function exec(cmd: string): string {
-  try {
-    return execSync(cmd, { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }).trim();
-  } catch {
-    return "";
-  }
-}
-
-interface TempBranch {
-  name: string;
-  isLocal: boolean;
-  isRemote: boolean;
-}
-
-function getTempBranches(): TempBranch[] {
-  const local = exec("git branch --format='%(refname:short)'")
-    .split("\n")
-    .filter((b) => b.startsWith("merge/") || b.startsWith("temp/"));
-  const remote = exec("git branch -r --format='%(refname:short)'")
-    .split("\n")
-    .filter((b) => b.startsWith("origin/merge/") || b.startsWith("origin/temp/"))
-    .map((b) => b.replace("origin/", ""));
-
-  const names = new Set([...local, ...remote]);
-  return [...names].map((name) => ({
-    name,
-    isLocal: local.includes(name),
-    isRemote: remote.includes(name),
-  }));
-}
-
-export function sweepCommand(): Command {
-  const cmd = new Command("sweep")
-    .description(t("sweep.description"))
-    .option("--dry-run", t("sweep.optionDryRun"))
-    .option("-y, --yes", t("sweep.optionYes"))
-    .option("--mine", t("sweep.optionMine"))
-    .action(async (opts) => {
-      try { await runSweep(opts); }
-      catch (err: any) { out.error(err.message); process.exit(1); }
-    });
-  return cmd;
-}
-
-async function runSweep(opts: any): Promise<void> {
+export async function runSweep(opts: any): Promise<void> {
   const ctx = getGitContext();
 
   out.blank();
@@ -163,13 +119,4 @@ async function runSweep(opts: any): Promise<void> {
   out.blank();
   out.success(t("sweep.complete"));
   out.blank();
-}
-
-function prStateIcon(state: string): string {
-  switch (state) {
-    case "MERGED": return chalk.magenta("◆");
-    case "OPEN": return chalk.green("●");
-    case "CLOSED": return chalk.red("✗");
-    default: return chalk.dim("?");
-  }
 }

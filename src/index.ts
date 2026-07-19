@@ -6,14 +6,14 @@ import pkg from "../package.json";
 
 import { registerLocale, initI18n, loadLocale, t } from "./lib/i18n.js";
 import { loadConfig } from "./lib/config-store.js";
-import { prCommand } from "./commands/pr.command.js";
-import { mergeCommand } from "./commands/merge.command.js";
-import { configCommand } from "./commands/config.command.js";
-import { statusCommand } from "./commands/status.command.js";
-import { syncCommand } from "./commands/sync.command.js";
-import { cleanupCommand } from "./commands/cleanup.command.js";
-import { commitCommand } from "./commands/commit.command.js";
-import { sweepCommand } from "./commands/sweep.command.js";
+import { prCommand } from "./commands/pr/index.js";
+import { mergeCommand } from "./commands/merge/index.js";
+import { configCommand } from "./commands/config/index.js";
+import { statusCommand } from "./commands/status/index.js";
+import { syncCommand } from "./commands/sync/index.js";
+import { cleanupCommand } from "./commands/cleanup/index.js";
+import { commitCommand } from "./commands/commit/index.js";
+import { sweepCommand } from "./commands/sweep/index.js";
 
 // Register locales (lazy-loaded)
 registerLocale("en", () => import("./locales/en.js"));

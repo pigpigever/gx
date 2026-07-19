@@ -1,4 +1,3 @@
-import { Command } from "commander";
 import chalk from "chalk";
 import {
   getGitContext,
@@ -8,43 +7,20 @@ import {
   hasDiff,
   checkoutBranch,
   fetchAll,
-} from "../lib/git.js";
+} from "@/lib/git.js";
 import {
   setTargets,
   getRepoConfig,
-} from "../lib/config-store.js";
-import { isGhAuthenticated, checkExistingPR, createPR, checkPRConflicts } from "../lib/github.js";
-import { selectTargets, promptForConfig, confirmAction, selectSourceBranch } from "../lib/interactor.js";
-import { generateBody, getPrTitle } from "../lib/formatter.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
-import { t } from "../lib/i18n.js";
-import type { PRResult } from "../types.js";
-import * as out from "../lib/output.js";
+} from "@/lib/config-store.js";
+import { isGhAuthenticated, checkExistingPR, createPR, checkPRConflicts } from "@/lib/github.js";
+import { selectTargets, promptForConfig, confirmAction, selectSourceBranch } from "@/lib/interactor.js";
+import { generateBody, getPrTitle } from "@/lib/formatter.js";
+import { startSpinner, succeed, fail } from "@/lib/spinner.js";
+import { t } from "@/lib/i18n.js";
+import type { PRResult } from "@/types.js";
+import * as out from "@/lib/output.js";
 
-export function prCommand(): Command {
-  const cmd = new Command("pr")
-    .description(t("pr.description"))
-    .option("-b, --branch <name>", t("pr.optionBranch"))
-    .option("-a, --all", t("pr.optionAll"))
-    .option("-t, --targets <list>", t("pr.optionTargets"))
-    .option("--title <text>", t("pr.optionTitle"))
-    .option("--body <text>", t("pr.optionBody"))
-    .option("--draft", t("pr.optionDraft"))
-    .option("--dry-run", t("pr.optionDryRun"))
-    .option("-y, --yes", t("pr.optionYes"))
-    .action(async (opts) => {
-      try {
-        await runPr(opts);
-      } catch (err: any) {
-        out.error(err.message);
-        process.exit(1);
-      }
-    });
-
-  return cmd;
-}
-
-async function runPr(opts: any): Promise<void> {
+export async function runPr(opts: any): Promise<void> {
   const ctx = getGitContext();
   let sourceBranch = opts.branch || ctx.currentBranch;
 

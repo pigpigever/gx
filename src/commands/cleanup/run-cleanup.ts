@@ -1,28 +1,15 @@
-import { Command } from "commander";
 import { checkbox } from "@inquirer/prompts";
 import chalk from "chalk";
-import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "../lib/git.js";
-import { getRepoTargets } from "../lib/config-store.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
-import { confirmAction } from "../lib/interactor.js";
-import { getPRsForBranch, type BranchPRInfo } from "../lib/github.js";
-import { t } from "../lib/i18n.js";
-import * as out from "../lib/output.js";
+import { getGitContext, getMergedBranches, deleteLocalBranch, deleteRemoteBranch, isUserBranch } from "@/lib/git.js";
+import { getRepoTargets } from "@/lib/config-store.js";
+import { startSpinner, succeed, fail } from "@/lib/spinner.js";
+import { confirmAction } from "@/lib/interactor.js";
+import { getPRsForBranch, type BranchPRInfo } from "@/lib/github.js";
+import { t } from "@/lib/i18n.js";
+import * as out from "@/lib/output.js";
+import { prStateIcon } from "@/commands/shared/pr-icons.js";
 
-export function cleanupCommand(): Command {
-  const cmd = new Command("cleanup")
-    .description(t("cleanup.description"))
-    .option("--dry-run", t("cleanup.optionDryRun"))
-    .option("-y, --yes", t("cleanup.optionYes"))
-    .option("--mine", t("cleanup.optionMine"))
-    .action(async (opts) => {
-      try { await runCleanup(opts); }
-      catch (err: any) { out.error(err.message); process.exit(1); }
-    });
-  return cmd;
-}
-
-async function runCleanup(opts: any): Promise<void> {
+export async function runCleanup(opts: any): Promise<void> {
   const ctx = getGitContext();
   let targets = getRepoTargets(ctx.owner, ctx.repo);
   if (targets.length === 0) targets = ["main", "master", "develop"];
@@ -140,13 +127,4 @@ async function runCleanup(opts: any): Promise<void> {
   out.blank();
   out.success(t("cleanup.complete"));
   out.blank();
-}
-
-function prStateIcon(state: string): string {
-  switch (state) {
-    case "MERGED": return chalk.magenta("◆");
-    case "OPEN": return chalk.green("●");
-    case "CLOSED": return chalk.red("✗");
-    default: return chalk.dim("?");
-  }
 }

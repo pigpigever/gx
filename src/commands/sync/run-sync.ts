@@ -1,4 +1,3 @@
-import { Command } from "commander";
 import { execSync } from "node:child_process";
 import chalk from "chalk";
 import {
@@ -7,27 +6,14 @@ import {
   mergeBranch,
   isBehindRemote,
   getBehindCommits,
-} from "../lib/git.js";
-import { getDefaultMergeTarget } from "../lib/config-store.js";
-import { confirmAction } from "../lib/interactor.js";
-import { startSpinner, succeed, fail } from "../lib/spinner.js";
-import { t } from "../lib/i18n.js";
-import * as out from "../lib/output.js";
+} from "@/lib/git.js";
+import { getDefaultMergeTarget } from "@/lib/config-store.js";
+import { confirmAction } from "@/lib/interactor.js";
+import { startSpinner, succeed, fail } from "@/lib/spinner.js";
+import { t } from "@/lib/i18n.js";
+import * as out from "@/lib/output.js";
 
-export function syncCommand(): Command {
-  const cmd = new Command("sync")
-    .description(t("sync.description"))
-    .option("--from <branch>", t("sync.optionFrom"))
-    .option("--rebase", t("sync.optionRebase"))
-    .option("-y, --yes", t("sync.optionYes"))
-    .action(async (opts) => {
-      try { await runSync(opts); }
-      catch (err: any) { out.error(err.message); process.exit(1); }
-    });
-  return cmd;
-}
-
-async function runSync(opts: any): Promise<void> {
+export async function runSync(opts: any): Promise<void> {
   const ctx = getGitContext();
   const sourceBranch = ctx.currentBranch;
   const fromBranch = opts.from || getDefaultMergeTarget(ctx.owner, ctx.repo) || "develop";

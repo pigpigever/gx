@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import chalk from "chalk";
-import { getGitContext, getRemoteBranches } from "../lib/git.js";
+import { getGitContext, getRemoteBranches } from "@/lib/git.js";
 import {
   addTarget,
   removeTarget,
@@ -8,10 +8,10 @@ import {
   setTargets,
   getConfigPath,
   setLanguage,
-} from "../lib/config-store.js";
-import { promptForConfig } from "../lib/interactor.js";
-import { switchLanguage, t } from "../lib/i18n.js";
-import * as out from "../lib/output.js";
+} from "@/lib/config-store.js";
+import { promptForConfig } from "@/lib/interactor.js";
+import { switchLanguage, t } from "@/lib/i18n.js";
+import * as out from "@/lib/output.js";
 
 export function configCommand(): Command {
   const cmd = new Command("config")
