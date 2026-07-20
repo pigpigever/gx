@@ -39,6 +39,7 @@ const zh: LocaleStrings = {
     noTargetsSelected: "未选择目标分支。退出。",
 
     checkingTargets: "检查目标分支",
+    checkingTargetProgress: "正在检查 {{branch}}（{{current}}/{{total}}）",
     targetsChecked: "目标分支检查完成",
     readyHint: "就绪",
     existingPrHint: "PR #{{number}} 已存在 — 将跳过",
@@ -57,6 +58,9 @@ const zh: LocaleStrings = {
 
     readyToCreate: "准备创建 {{count}} 个 PR:",
     creating: "正在创建 {{count}} 个 PR",
+    checkingExisting: "检查是否已有 PR → {{target}}",
+    generatingBody: "生成 PR 描述 → {{target}}",
+    creatingForTarget: "正在创建 PR → {{target}}",
     createdSkipped: "{{created}} 已创建，{{skipped}} 已跳过",
     createdSkippedFailed: "{{created}} 已创建，{{skipped}} 已跳过，{{failed}} 失败",
 
@@ -67,6 +71,7 @@ const zh: LocaleStrings = {
     errorPrefix: "错误: {{msg}}",
 
     checkingConflicts: "检查合并冲突",
+    checkingConflictProgress: "正在检查 {{target}}（{{current}}/{{total}}）",
     conflictsFound: "发现 {{count}} 个冲突",
     noConflicts: "未检测到冲突",
   },

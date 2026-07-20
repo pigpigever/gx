@@ -124,17 +124,20 @@ export async function runPr(opts: any): Promise<void> {
     out.blank();
     const hints = new Map<string, string>();
     const hintSpinner = startSpinner(t("pr.checkingTargets"));
+    let checked = 0;
     for (const branch of configuredTargets) {
-      const existing = checkExistingPR(ctx.owner, ctx.repo, sourceBranch, branch);
+      hintSpinner.text = t("pr.checkingTargetProgress", { branch, current: checked + 1, total: configuredTargets.length });
+      const existing = await checkExistingPR(ctx.owner, ctx.repo, sourceBranch, branch);
       if (existing) {
         hints.set(branch, t("pr.existingPrHint", { number: existing.number }));
-      } else if (!branchExistsOnRemote(branch)) {
+      } else if (!(await branchExistsOnRemote(branch))) {
         hints.set(branch, chalk.red(t("pr.notFoundHint")));
-      } else if (!hasDiff(sourceBranch, branch)) {
+      } else if (!(await hasDiff(sourceBranch, branch))) {
         hints.set(branch, t("pr.noDiffHint"));
       } else {
         hints.set(branch, t("pr.readyHint"));
       }
+      checked++;
     }
     succeed(hintSpinner, t("pr.targetsChecked"));
     targets = await selectTargets(configuredTargets, hints);
@@ -150,7 +153,7 @@ export async function runPr(opts: any): Promise<void> {
   const skippedTargets: PRResult[] = [];
 
   for (const target of targets) {
-    if (!branchExistsOnRemote(target)) {
+    if (!(await branchExistsOnRemote(target))) {
       out.warning(`${target} — ${t("pr.branchNotFoundSkip")}, skipping`);
       skippedTargets.push({
         target,
@@ -175,7 +178,7 @@ export async function runPr(opts: any): Promise<void> {
     console.log(chalk.bold.cyan(`${t("general.dryRunPrefix")} ${t("pr.dryRunWouldCreate")}`));
     out.blank();
     for (const target of validTargets) {
-      const title = opts.title || getPrTitle(sourceBranch);
+      const title = opts.title || await getPrTitle(sourceBranch);
       console.log(
         `  ${chalk.dim("→")} ${chalk.bold(sourceBranch)} ${chalk.dim("→")} ${chalk.bold(target)}  "${title}"`
       );
@@ -206,7 +209,8 @@ export async function runPr(opts: any): Promise<void> {
   const results: PRResult[] = [...skippedTargets];
 
   const prPromises = validTargets.map(async (target): Promise<PRResult> => {
-    const existing = checkExistingPR(ctx.owner, ctx.repo, sourceBranch, target);
+    createSpinner.text = t("pr.checkingExisting", { target });
+    const existing = await checkExistingPR(ctx.owner, ctx.repo, sourceBranch, target);
     if (existing) {
       return {
         target,
@@ -218,9 +222,11 @@ export async function runPr(opts: any): Promise<void> {
     }
 
     try {
-      const title = opts.title || getPrTitle(sourceBranch);
-      const body = opts.body || generateBody(sourceBranch, target);
-      const created = createPR({
+      createSpinner.text = t("pr.generatingBody", { target });
+      const title = opts.title || await getPrTitle(sourceBranch);
+      const body = opts.body || await generateBody(sourceBranch, target);
+      createSpinner.text = t("pr.creatingForTarget", { target });
+      const created = await createPR({
         owner: ctx.owner,
         repo: ctx.repo,
         head: sourceBranch,
@@ -257,7 +263,8 @@ export async function runPr(opts: any): Promise<void> {
     const conflictSpinner = startSpinner(t("pr.checkingConflicts"));
     const conflicts: PRResult[] = [];
     for (const r of prsToCheck) {
-      if (r.number && checkPRConflicts(ctx.owner, ctx.repo, r.number)) {
+      conflictSpinner.text = t("pr.checkingConflictProgress", { target: r.target, current: conflicts.length + 1, total: prsToCheck.length });
+      if (r.number && await checkPRConflicts(ctx.owner, ctx.repo, r.number)) {
         conflicts.push(r);
       }
     }

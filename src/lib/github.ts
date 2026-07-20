@@ -1,7 +1,19 @@
-import { execSync } from "node:child_process";
+import { execSync, exec as execCb } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { PRCreateOptions, PROverview } from "../types.js";
+
+function execAsync(cmd: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execCb(cmd, {
+      encoding: "utf-8",
+      maxBuffer: 10 * 1024 * 1024,
+    }, (err, stdout) => {
+      if (err) reject(err);
+      else resolve(stdout.trim());
+    });
+  });
+}
 
 // ── Auth ──
 
@@ -67,17 +79,16 @@ export interface ExistingPR {
   url: string;
 }
 
-export function checkExistingPR(
+export async function checkExistingPR(
   owner: string,
   repo: string,
   head: string,
   base: string
-): ExistingPR | null {
+): Promise<ExistingPR | null> {
   try {
-    const json = execSync(
-      `gh pr list --head "${head}" --base "${base}" --state open --json number,url --limit 1`,
-      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-    ).trim();
+    const json = await execAsync(
+      `gh pr list --head "${head}" --base "${base}" --state open --json number,url --limit 1`
+    );
 
     if (!json || json === "[]") return null;
 
@@ -98,7 +109,7 @@ export interface CreatedPR {
   number: number;
 }
 
-export function createPR(opts: PRCreateOptions): CreatedPR {
+export async function createPR(opts: PRCreateOptions): Promise<CreatedPR> {
   const { owner, repo, head, base, title, body, draft } = opts;
 
   let cmd = `gh pr create --repo "${owner}/${repo}" --head "${head}" --base "${base}"`;
@@ -107,10 +118,7 @@ export function createPR(opts: PRCreateOptions): CreatedPR {
   if (draft) cmd += " --draft";
 
   try {
-    const output = execSync(cmd, {
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    const output = await execAsync(cmd);
 
     const numMatch = output.match(/\/pull\/(\d+)/);
     const number = numMatch ? parseInt(numMatch[1], 10) : 0;
@@ -119,7 +127,7 @@ export function createPR(opts: PRCreateOptions): CreatedPR {
   } catch (err: any) {
     const token = getAuthToken();
     if (token) {
-      const result = createPRRestSync(opts, token);
+      const result = await createPRRestAsync(opts, token);
       if (result) return result;
     }
     throw new Error(
@@ -128,7 +136,7 @@ export function createPR(opts: PRCreateOptions): CreatedPR {
   }
 }
 
-function createPRRestSync(opts: PRCreateOptions, token: string): CreatedPR | null {
+async function createPRRestAsync(opts: PRCreateOptions, token: string): Promise<CreatedPR | null> {
   try {
     const body = JSON.stringify({
       title: opts.title,
@@ -139,10 +147,7 @@ function createPRRestSync(opts: PRCreateOptions, token: string): CreatedPR | nul
     });
 
     const cmd = `curl -s -X POST "https://api.github.com/repos/${opts.owner}/${opts.repo}/pulls" -H "Authorization: token ${token}" -H "Accept: application/vnd.github.v3+json" -H "Content-Type: application/json" -d '${body.replace(/'/g, "'\\''")}'`;
-    const output = execSync(cmd, {
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    const output = await execAsync(cmd);
 
     const data = JSON.parse(output);
     if (data.html_url) {
@@ -249,12 +254,11 @@ function parseCIStatus(
 
 // ── PR conflict check ──
 
-export function checkPRConflicts(owner: string, repo: string, number: number): boolean {
+export async function checkPRConflicts(owner: string, repo: string, number: number): Promise<boolean> {
   try {
-    const json = execSync(
-      `gh pr view ${number} --repo "${owner}/${repo}" --json mergeable`,
-      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-    ).trim();
+    const json = await execAsync(
+      `gh pr view ${number} --repo "${owner}/${repo}" --json mergeable`
+    );
     const data = JSON.parse(json);
     return data.mergeable === "CONFLICTING";
   } catch {

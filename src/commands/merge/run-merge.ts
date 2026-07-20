@@ -102,10 +102,10 @@ export async function runMerge(opts: any): Promise<void> {
 
   // ── Step 5: Create PR ──
   spinner = startSpinner(t("merge.creatingPr"));
-  const title = getPrTitle(sourceBranch);
-  const body = generateBody(sourceBranch, targetBranch);
+  const title = await getPrTitle(sourceBranch);
+  const body = await generateBody(sourceBranch, targetBranch);
 
-  const pr = createPR({
+  const pr = await createPR({
     owner: ctx.owner,
     repo: ctx.repo,
     head: tempBranch,
