@@ -253,7 +253,7 @@ export async function getUniqueCommits(source: string, target: string): Promise<
   // stale. Comparing against a stale local target would include commits from
   // other branches that were already merged into the remote target.
   try {
-    const output = await execAsync(`git log --oneline origin/${target}..${source}`);
+    const output = await execAsync(`git log --oneline --no-merges origin/${target}..${source}`);
     if (!output) return [];
     return output.split("\n").filter(Boolean);
   } catch {
