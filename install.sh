@@ -32,10 +32,6 @@ check_dependencies() {
         echo "  curl -fsSL https://bun.sh/install | bash"
         exit 1
     fi
-    
-    if ! command_exists node; then
-        warn "Node.js is not installed. Some features may require Node.js."
-    fi
 }
 
 # Clone or update repository
@@ -57,17 +53,10 @@ setup_repository() {
 # Build binary
 build_binary() {
     info "Installing dependencies..."
-    # Use pnpm to avoid lockfile version issues
-    if command_exists pnpm; then
-        pnpm approve-builds esbuild 2>/dev/null || true
-        pnpm install
-        info "Building binary..."
-        pnpm run build:binary
-    else
-        bun install
-        info "Building binary..."
-        bun run build:binary
-    fi
+    bun install
+    
+    info "Building binary..."
+    bun run build:binary
     
     # Check if binary was built
     if [ ! -f "dist/gx" ]; then
