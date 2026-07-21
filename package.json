@@ -10,7 +10,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --out-dir dist --clean",
+    "build": "tsup src/index.ts --format esm --out-dir dist --clean && ln -sf index.js dist/gx && chmod +x dist/gx",
     "build:binary": "bun build --compile ./src/index.ts --outfile dist/gx",
     "dev": "tsx src/index.ts",
     "test": "vitest run",

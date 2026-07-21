@@ -39,7 +39,7 @@ pnpm add -g gx
 git clone https://github.com/pigpigever/gx.git
 cd gx && pnpm install && pnpm run build && pnpm link --global
 
-# One-line install script
+# One-line install (binary)
 curl -fsSL https://raw.githubusercontent.com/pigpigever/gx/main/install.sh | bash
 ```
 

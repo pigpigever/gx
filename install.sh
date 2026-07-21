@@ -27,33 +27,20 @@ command_exists() {
 
 # Check dependencies
 check_dependencies() {
+    if ! command_exists bun; then
+        error "Bun is not installed. Please install bun first:"
+        echo "  curl -fsSL https://bun.sh/install | bash"
+        exit 1
+    fi
+    
     if ! command_exists node; then
-        error "Node.js is not installed. Please install Node.js >= 18"
-        exit 1
-    fi
-
-    # Check Node.js version
-    NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-    if [ "$NODE_VERSION" -lt 18 ]; then
-        error "Node.js version must be >= 18. Current version: $(node -v)"
-        exit 1
-    fi
-
-    if ! command_exists pnpm; then
-        warn "pnpm is not installed. Trying npm..."
-        if ! command_exists npm; then
-            error "Neither pnpm nor npm is installed. Please install one of them."
-            exit 1
-        fi
-        PACKAGE_MANAGER="npm"
-    else
-        PACKAGE_MANAGER="pnpm"
+        warn "Node.js is not installed. Some features may require Node.js."
     fi
 }
 
 # Clone or update repository
 setup_repository() {
-    GX_DIR="$HOME/.gx"
+    GX_DIR="$HOME/.gx-build"
     
     if [ -d "$GX_DIR" ]; then
         info "Repository already exists at $GX_DIR"
@@ -67,56 +54,39 @@ setup_repository() {
     fi
 }
 
-# Install dependencies and build
-build_project() {
+# Build binary
+build_binary() {
     info "Installing dependencies..."
-    $PACKAGE_MANAGER install
+    bun install
     
-    info "Building project..."
-    $PACKAGE_MANAGER run build
-}
-
-# Setup PATH
-setup_path() {
-    DIST_DIR="$PWD/dist"
+    info "Building binary..."
+    bun run build:binary
     
-    # Check if already in PATH
-    if [[ ":$PATH:" == *":$DIST_DIR:"* ]]; then
-        info "gx is already in your PATH"
-        return
+    # Check if binary was built
+    if [ ! -f "dist/gx" ]; then
+        error "Binary build failed"
+        exit 1
     fi
     
-    # Determine shell config file
-    SHELL_NAME=$(basename "$SHELL")
-    case "$SHELL_NAME" in
-        bash)
-            if [ -f "$HOME/.bashrc" ]; then
-                SHELL_CONFIG="$HOME/.bashrc"
-            elif [ -f "$HOME/.bash_profile" ]; then
-                SHELL_CONFIG="$HOME/.bash_profile"
-            else
-                SHELL_CONFIG="$HOME/.bash_profile"
-            fi
-            ;;
-        zsh)
-            SHELL_CONFIG="$HOME/.zshrc"
-            ;;
-        *)
-            SHELL_CONFIG="$HOME/.profile"
-            ;;
-    esac
+    info "Binary built successfully"
+}
+
+# Install binary
+install_binary() {
+    INSTALL_DIR="/usr/local/bin"
     
-    # Add to PATH
-    info "Adding gx to your PATH in $SHELL_CONFIG"
-    echo "" >> "$SHELL_CONFIG"
-    echo "# gx - Git Extended" >> "$SHELL_CONFIG"
-    echo "export PATH=\"$DIST_DIR:\$PATH\"" >> "$SHELL_CONFIG"
+    # Check if we need sudo
+    if [ -w "$INSTALL_DIR" ]; then
+        sudo=""
+    else
+        sudo="sudo"
+    fi
     
-    # Reload shell config
-    info "Reloading shell configuration..."
-    source "$SHELL_CONFIG" 2>/dev/null || true
+    info "Installing gx to $INSTALL_DIR..."
+    $sudo cp dist/gx "$INSTALL_DIR/gx"
+    $sudo chmod +x "$INSTALL_DIR/gx"
     
-    info "Please run 'source $SHELL_CONFIG' or restart your terminal"
+    info "gx installed to $INSTALL_DIR/gx"
 }
 
 # Verify installation
@@ -126,29 +96,33 @@ verify_installation() {
         info "gx is installed successfully!"
         gx --version
     else
-        # Try direct path
-        if [ -f "$PWD/dist/index.js" ]; then
-            info "gx is installed. You may need to restart your terminal or run:"
-            echo "  export PATH=\"$PWD/dist:\$PATH\""
-        else
-            error "Installation verification failed"
-            exit 1
-        fi
+        error "Installation verification failed"
+        exit 1
+    fi
+}
+
+# Cleanup
+cleanup() {
+    GX_DIR="$HOME/.gx-build"
+    if [ -d "$GX_DIR" ]; then
+        info "Cleaning up build directory..."
+        rm -rf "$GX_DIR"
     fi
 }
 
 # Main function
 main() {
-    info "Installing gx - Git Extended"
+    info "Installing gx - Git Extended (binary mode)"
     
     check_dependencies
     setup_repository
-    build_project
-    setup_path
+    build_binary
+    install_binary
     verify_installation
+    cleanup
     
     info "Installation completed!"
-    info "You can now use 'gx' command. Try: gx --help"
+    info "You can now use 'gx' command directly. Try: gx --help"
 }
 
 # Run main function
