@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execSync, exec as execCb } from "node:child_process";
 import { existsSync } from "node:fs";
 import type { GitContext, BranchToClean } from "../types.js";
 
@@ -14,6 +14,19 @@ function exec(cmd: string, cwd?: string): string {
   } catch {
     return "";
   }
+}
+
+function execAsync(cmd: string, cwd?: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execCb(cmd, {
+      encoding: "utf-8" as BufferEncoding,
+      maxBuffer: 10 * 1024 * 1024,
+      cwd,
+    }, (err, stdout) => {
+      if (err) reject(err);
+      else resolve(stdout.trim());
+    });
+  });
 }
 
 function execOrThrow(cmd: string, cwd?: string): string {
@@ -52,8 +65,13 @@ export function hasOriginRemote(): boolean {
   return exec("git remote get-url origin") !== "";
 }
 
-export function branchExistsOnRemote(branch: string): boolean {
-  return exec(`git ls-remote --heads origin ${branch}`) !== "";
+export async function branchExistsOnRemote(branch: string): Promise<boolean> {
+  try {
+    await execAsync(`git ls-remote --heads origin ${branch}`);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function hasUnpushedCommits(branch: string): boolean {
@@ -62,9 +80,13 @@ export function hasUnpushedCommits(branch: string): boolean {
   return parseInt(result, 10) > 0;
 }
 
-export function hasDiff(head: string, base: string): boolean {
-  const result = exec(`git diff --stat origin/${base}...origin/${head}`);
-  return result !== "";
+export async function hasDiff(head: string, base: string): Promise<boolean> {
+  try {
+    const result = await execAsync(`git diff --stat origin/${base}...origin/${head}`);
+    return result !== "";
+  } catch {
+    return false;
+  }
 }
 
 // ── Remote branches ──
@@ -225,15 +247,27 @@ export function getCommitLogBetween(head: string, base: string): string[] {
   return output.split("\n").filter(Boolean);
 }
 
-export function getUniqueCommits(source: string, target: string): string[] {
-  const output = exec(`git log --oneline ${target}..${source}`);
-  if (!output) return [];
-  return output.split("\n").filter(Boolean);
+export async function getUniqueCommits(source: string, target: string): Promise<string[]> {
+  // Use origin/${target} instead of local ${target} because after fetchAll()
+  // the remote tracking branch is up-to-date, while the local branch may be
+  // stale. Comparing against a stale local target would include commits from
+  // other branches that were already merged into the remote target.
+  try {
+    const output = await execAsync(`git log --oneline origin/${target}..${source}`);
+    if (!output) return [];
+    return output.split("\n").filter(Boolean);
+  } catch {
+    return [];
+  }
 }
 
-export function getLatestCommitMessage(branch: string): string | null {
-  const output = exec(`git log -1 --format=%s ${branch}`);
-  return output || null;
+export async function getLatestCommitMessage(branch: string): Promise<string | null> {
+  try {
+    const output = await execAsync(`git log -1 --format=%s ${branch}`);
+    return output || null;
+  } catch {
+    return null;
+  }
 }
 
 export function isUserBranch(branch: string, targets: string[]): boolean {

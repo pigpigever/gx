@@ -41,6 +41,7 @@ const en: LocaleStrings = {
     noTargetsSelected: "No targets selected. Exiting.",
 
     checkingTargets: "Checking target branches",
+    checkingTargetProgress: "Checking {{branch}} ({{current}}/{{total}})",
     targetsChecked: "Target branches checked",
     readyHint: "ready",
     existingPrHint: "PR #{{number}} already exists — will skip",
@@ -59,6 +60,9 @@ const en: LocaleStrings = {
 
     readyToCreate: "Ready to create {{count}} PR(s):",
     creating: "Creating {{count}} PR(s)",
+    checkingExisting: "Checking for existing PR → {{target}}",
+    generatingBody: "Generating PR body → {{target}}",
+    creatingForTarget: "Creating PR → {{target}}",
     createdSkipped: "{{created}} created, {{skipped}} skipped",
     createdSkippedFailed: "{{created}} created, {{skipped}} skipped, {{failed}} failed",
 
@@ -69,6 +73,7 @@ const en: LocaleStrings = {
     errorPrefix: "error: {{msg}}",
 
     checkingConflicts: "Checking for merge conflicts",
+    checkingConflictProgress: "Checking {{target}} ({{current}}/{{total}})",
     conflictsFound: "{{count}} conflict(s) found",
     noConflicts: "No conflicts detected",
   },

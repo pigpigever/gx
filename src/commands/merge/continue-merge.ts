@@ -49,10 +49,10 @@ export async function continueMerge(): Promise<void> {
   const sourceBranch = sourceMatch ? sourceMatch[1].replace(/-/g, "/") : "unknown";
 
   s = startSpinner(t("merge.creatingPr"));
-  const title = getPrTitle(sourceBranch);
-  const body = generateBody(sourceBranch, targetBranch);
+  const title = await getPrTitle(sourceBranch);
+  const body = await generateBody(sourceBranch, targetBranch);
 
-  const pr = createPR({
+  const pr = await createPR({
     owner: ctx.owner,
     repo: ctx.repo,
     head: tempBranch,

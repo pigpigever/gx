@@ -32,8 +32,8 @@ export function branchToTitle(branch: string): string {
   return branch;
 }
 
-export function getPrTitle(sourceBranch: string): string {
-  const lastMsg = getLatestCommitMessage(sourceBranch);
+export async function getPrTitle(sourceBranch: string): Promise<string> {
+  const lastMsg = await getLatestCommitMessage(sourceBranch);
   return lastMsg || branchToTitle(sourceBranch);
 }
 
@@ -68,11 +68,11 @@ function isBugfix(type: string): boolean {
 
 // ── Body generation ──
 
-export function generateBody(
+export async function generateBody(
   sourceBranch: string,
   targetBranch: string
-): string {
-  const rawCommits = getUniqueCommits(sourceBranch, targetBranch);
+): Promise<string> {
+  const rawCommits = await getUniqueCommits(sourceBranch, targetBranch);
 
   if (rawCommits.length === 0) {
     return [
