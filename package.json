@@ -1,6 +1,6 @@
 {
   "name": "gx",
-  "version": "1.1.24",
+  "version": "1.2.0",
   "description": "Git Extended — batch PR creation, safe merge, and git workflow automation",
   "type": "module",
   "bin": {
