@@ -57,10 +57,16 @@ setup_repository() {
 # Build binary
 build_binary() {
     info "Installing dependencies..."
-    bun install
-    
-    info "Building binary..."
-    bun run build:binary
+    # Use pnpm to avoid lockfile version issues
+    if command_exists pnpm; then
+        pnpm install
+        info "Building binary..."
+        pnpm run build:binary
+    else
+        bun install
+        info "Building binary..."
+        bun run build:binary
+    fi
     
     # Check if binary was built
     if [ ! -f "dist/gx" ]; then
