@@ -53,6 +53,8 @@ setup_repository() {
 # Build binary
 build_binary() {
     info "Installing dependencies..."
+    # Remove pnpm lockfile to avoid bun migration errors
+    rm -f pnpm-lock.yaml
     bun install
     
     info "Building binary..."
