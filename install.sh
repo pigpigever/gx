@@ -59,6 +59,7 @@ build_binary() {
     info "Installing dependencies..."
     # Use pnpm to avoid lockfile version issues
     if command_exists pnpm; then
+        pnpm approve-builds esbuild 2>/dev/null || true
         pnpm install
         info "Building binary..."
         pnpm run build:binary
