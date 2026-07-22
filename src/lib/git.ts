@@ -270,6 +270,14 @@ export async function getLatestCommitMessage(branch: string): Promise<string | n
   }
 }
 
+export async function getDiff(source: string, target: string): Promise<string> {
+  try {
+    return await execAsync(`git diff origin/${target}...${source}`);
+  } catch {
+    return "";
+  }
+}
+
 export function isUserBranch(branch: string, targets: string[]): boolean {
   const author = exec("git config user.name");
   if (!author) return true; // can't determine, assume yes

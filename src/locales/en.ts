@@ -76,6 +76,22 @@ const en: LocaleStrings = {
     checkingConflictProgress: "Checking {{target}} ({{current}}/{{total}})",
     conflictsFound: "{{count}} conflict(s) found",
     noConflicts: "No conflicts detected",
+
+    fetching: "Fetching latest changes",
+    fetched: "Fetched latest changes",
+    validatingTargets: "Validating target branches",
+    validatingTarget: "Checking {{target}}",
+    validatedTargets: "Validated {{count}} target(s)",
+
+    optionAi: "Use AI to generate PR title and body",
+    optionNoAi: "Disable AI generation",
+    aiGenerating: "Generating PR content with AI",
+    aiGenerated: "AI content generated",
+    aiTitle: "Title",
+    aiBody: "Body",
+    aiConfirm: "Use this AI-generated content?",
+    aiNoKey: "No AI API key configured. Run 'gx config ai' to set up.",
+    aiFallback: "Falling back to default generation",
   },
 
   merge: {
@@ -204,6 +220,8 @@ const en: LocaleStrings = {
     mergeInProgressOn: "Merge in progress on {{branch}}",
     mergeContinueHint: "gx merge --continue  |  gx merge --abort",
     draftTag: " [draft]",
+    fetchingPrs: "Fetching PR status",
+    fetchedPrs: "Fetched {{count}} PR(s)",
   },
 
   config: {
@@ -225,6 +243,26 @@ const en: LocaleStrings = {
     setLangDesc: "Set display language",
     langSet: "Language set to {{lang}}",
     unknownLang: "Unknown language: {{lang}}. Available: {{available}}",
+    aiDesc: "Configure AI settings for commit and PR generation",
+  },
+
+  aiConfig: {
+    selectProvider: "Select AI provider:",
+    providerPrompt: "AI provider",
+    endpointPrompt: "API endpoint URL",
+    endpointRequired: "Endpoint URL is required",
+    apiKeyPrompt: "API key",
+    apiKeyRequired: "API key is required",
+    modelPrompt: "Model name",
+    testPrompt: "Test connection?",
+    testing: "Testing connection",
+    testSuccess: "Connection successful: {{response}}",
+    testFailed: "Connection failed: {{error}}",
+    saveAnyway: "Save configuration anyway?",
+    savePrompt: "Save configuration?",
+    saved: "AI configuration saved",
+    configPath: "Config: {{path}}",
+    aborted: "Configuration aborted.",
   },
 
   commit: {

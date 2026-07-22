@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { confirm } from "@inquirer/prompts";
 import {
   getGitContext,
   getRemoteBranches,
@@ -14,7 +15,8 @@ import {
 } from "@/lib/config-store.js";
 import { isGhAuthenticated, checkExistingPR, createPR, checkPRConflicts } from "@/lib/github.js";
 import { selectTargets, promptForConfig, confirmAction, selectSourceBranch } from "@/lib/interactor.js";
-import { generateBody, getPrTitle } from "@/lib/formatter.js";
+import { generateBody, getPrTitle, generatePrContentWithAI } from "@/lib/formatter.js";
+import { getAiConfig } from "@/lib/ai.js";
 import { startSpinner, succeed, fail } from "@/lib/spinner.js";
 import { t } from "@/lib/i18n.js";
 import type { PRResult } from "@/types.js";
@@ -88,7 +90,9 @@ export async function runPr(opts: any): Promise<void> {
 
   // ── Determine targets ──
   let targets: string[];
+  const fetchSpinner = startSpinner(t("pr.fetching"));
   fetchAll();
+  succeed(fetchSpinner, t("pr.fetched"));
 
   if (opts.targets) {
     targets = opts.targets.split(",").map((t: string) => t.trim()).filter(Boolean);
@@ -151,8 +155,10 @@ export async function runPr(opts: any): Promise<void> {
   // ── Validate targets ──
   const validTargets: string[] = [];
   const skippedTargets: PRResult[] = [];
+  const validateSpinner = startSpinner(t("pr.validatingTargets"));
 
   for (const target of targets) {
+    validateSpinner.text = t("pr.validatingTarget", { target });
     if (!(await branchExistsOnRemote(target))) {
       out.warning(`${target} — ${t("pr.branchNotFoundSkip")}, skipping`);
       skippedTargets.push({
@@ -166,6 +172,7 @@ export async function runPr(opts: any): Promise<void> {
       validTargets.push(target);
     }
   }
+  succeed(validateSpinner, t("pr.validatedTargets", { count: targets.length }));
 
   if (validTargets.length === 0) {
     out.printPRResults(skippedTargets);
@@ -223,8 +230,46 @@ export async function runPr(opts: any): Promise<void> {
 
     try {
       createSpinner.text = t("pr.generatingBody", { target });
-      const title = opts.title || await getPrTitle(sourceBranch);
-      const body = opts.body || await generateBody(sourceBranch, target);
+      
+      // Determine if we should use AI
+      const aiConfig = getAiConfig();
+      const useAi = opts.ai === true || (opts.ai !== false && aiConfig);
+      
+      let title: string;
+      let body: string;
+      
+      if (useAi && aiConfig) {
+        // AI generation
+        createSpinner.text = t("pr.aiGenerating");
+        const aiContent = await generatePrContentWithAI(sourceBranch, target);
+        title = opts.title || aiContent.title;
+        body = opts.body || aiContent.body;
+        
+        // Show AI result for confirmation (unless --yes)
+        if (!opts.yes && !opts.title && !opts.body) {
+          succeed(createSpinner, t("pr.aiGenerated"));
+          out.blank();
+          console.log(chalk.bold(t("pr.aiTitle") + ": ") + title);
+          console.log(chalk.dim("───"));
+          console.log(body);
+          console.log(chalk.dim("───"));
+          out.blank();
+          
+          const proceed = await confirm({ message: t("pr.aiConfirm"), default: true });
+          if (!proceed) {
+            out.info(t("pr.aiFallback"));
+            title = opts.title || await getPrTitle(sourceBranch);
+            body = opts.body || await generateBody(sourceBranch, target);
+          }
+          createSpinner.text = t("pr.creatingForTarget", { target });
+          createSpinner.start();
+        }
+      } else {
+        // Traditional generation
+        title = opts.title || await getPrTitle(sourceBranch);
+        body = opts.body || await generateBody(sourceBranch, target);
+      }
+      
       createSpinner.text = t("pr.creatingForTarget", { target });
       const created = await createPR({
         owner: ctx.owner,

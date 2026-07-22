@@ -1,4 +1,5 @@
-import { getUniqueCommits, getLatestCommitMessage } from "./git.js";
+import { getUniqueCommits, getLatestCommitMessage, getDiff } from "./git.js";
+import { getAiConfig, callAiApi } from "./ai.js";
 import { t } from "./i18n.js";
 
 const TITLE_PREFIXES: Record<string, string> = {
@@ -116,4 +117,60 @@ export async function generateBody(
 
   sections.push(`${t("formatter.source")}: \`${sourceBranch}\` → \`${targetBranch}\``);
   return sections.join("\n");
+}
+
+// ── AI generation ──
+
+export async function generatePrContentWithAI(
+  sourceBranch: string,
+  targetBranch: string
+): Promise<{ title: string; body: string }> {
+  const aiConfig = getAiConfig();
+  if (!aiConfig) {
+    throw new Error(t("pr.aiNoKey"));
+  }
+
+  const [diff, commits] = await Promise.all([
+    getDiff(sourceBranch, targetBranch),
+    getUniqueCommits(sourceBranch, targetBranch),
+  ]);
+
+  const truncatedDiff = diff.length > 8000 ? diff.slice(0, 8000) + "\n... (truncated)" : diff;
+  const commitLog = commits.join("\n");
+
+  const prompt = [
+    "You are a pull request description generator for a Git workflow tool.",
+    "Given the git diff and commit log below, generate a PR title and body.",
+    "",
+    "Requirements:",
+    "- Title: conventional commit format (type(scope): description), under 72 chars",
+    "- Body: include Summary, Changes, and Testing sections",
+    "- Use markdown formatting",
+    "- Be concise but informative",
+    "",
+    `Source branch: ${sourceBranch}`,
+    `Target branch: ${targetBranch}`,
+    "",
+    "Git diff:",
+    truncatedDiff || "(no diff available)",
+    "",
+    "Commits:",
+    commitLog || "(no commits)",
+    "",
+    'Return ONLY JSON: {"title": "...", "body": "..."}',
+  ].join("\n");
+
+  const response = await callAiApi(aiConfig.endpoint, aiConfig.apiKey, aiConfig.model, prompt);
+
+  // Parse JSON response
+  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error("Failed to parse AI response as JSON");
+  }
+
+  const parsed = JSON.parse(jsonMatch[0]);
+  return {
+    title: parsed.title || `${sourceBranch} → ${targetBranch}`,
+    body: parsed.body || "",
+  };
 }

@@ -74,6 +74,22 @@ const zh: LocaleStrings = {
     checkingConflictProgress: "正在检查 {{target}}（{{current}}/{{total}}）",
     conflictsFound: "发现 {{count}} 个冲突",
     noConflicts: "未检测到冲突",
+
+    fetching: "正在获取最新更改",
+    fetched: "已获取最新更改",
+    validatingTargets: "正在验证目标分支",
+    validatingTarget: "正在检查 {{target}}",
+    validatedTargets: "已验证 {{count}} 个目标分支",
+
+    optionAi: "使用 AI 生成 PR 标题和描述",
+    optionNoAi: "禁用 AI 生成",
+    aiGenerating: "正在使用 AI 生成 PR 内容",
+    aiGenerated: "AI 内容已生成",
+    aiTitle: "标题",
+    aiBody: "描述",
+    aiConfirm: "使用此 AI 生成的内容？",
+    aiNoKey: "未配置 AI API 密钥。请运行 'gx config ai' 进行设置。",
+    aiFallback: "回退到默认生成方式",
   },
 
   merge: {
@@ -203,6 +219,8 @@ const zh: LocaleStrings = {
     mergeInProgressOn: "合并进行中，位于 {{branch}}",
     mergeContinueHint: "gx merge --continue  |  gx merge --abort",
     draftTag: " [草稿]",
+    fetchingPrs: "正在获取 PR 状态",
+    fetchedPrs: "已获取 {{count}} 个 PR",
   },
 
   config: {
@@ -224,6 +242,26 @@ const zh: LocaleStrings = {
     saved: "已为 {{repo}} 保存 {{count}} 个目标",
     langSet: "语言已设置为 {{lang}}",
     unknownLang: "未知语言: {{lang}}。可选: {{available}}",
+    aiDesc: "配置 AI 设置，用于提交和 PR 生成",
+  },
+
+  aiConfig: {
+    selectProvider: "选择 AI 提供商:",
+    providerPrompt: "AI 提供商",
+    endpointPrompt: "API 端点 URL",
+    endpointRequired: "端点 URL 不能为空",
+    apiKeyPrompt: "API 密钥",
+    apiKeyRequired: "API 密钥不能为空",
+    modelPrompt: "模型名称",
+    testPrompt: "测试连接？",
+    testing: "正在测试连接",
+    testSuccess: "连接成功: {{response}}",
+    testFailed: "连接失败: {{error}}",
+    saveAnyway: "仍然保存配置？",
+    savePrompt: "保存配置？",
+    saved: "AI 配置已保存",
+    configPath: "配置文件: {{path}}",
+    aborted: "配置已取消。",
   },
 
   commit: {

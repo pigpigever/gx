@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { getGitContext, isMergeInProgress, isOnGxMergeBranch } from "@/lib/git.js";
 import { listOpenPRs, isGhAuthenticated } from "@/lib/github.js";
+import { startSpinner, succeed } from "@/lib/spinner.js";
 import { t } from "@/lib/i18n.js";
 import * as out from "@/lib/output.js";
 
@@ -16,7 +17,9 @@ export function statusCommand(): Command {
         if (!isGhAuthenticated()) {
           out.warning(t("status.notAuth"));
         } else {
+          const spinner = startSpinner(t("status.fetchingPrs"));
           const prs = listOpenPRs(ctx.owner, ctx.repo);
+          succeed(spinner, t("status.fetchedPrs", { count: prs.length }));
           for (const pr of prs) {
             if (pr.head === ctx.currentBranch) pr.author = "me";
           }

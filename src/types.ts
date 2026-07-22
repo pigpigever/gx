@@ -8,6 +8,15 @@ export interface GitContext {
   repo: string;
 }
 
+// ── AI Configuration ──
+
+export interface AiConfig {
+  provider?: string;
+  model: string;
+  endpoint: string;
+  apiKey: string;
+}
+
 // ── Configuration ──
 
 export interface RepoConfig {
@@ -18,6 +27,7 @@ export interface RepoConfig {
 export interface GxConfig {
   version: number;
   language?: string;
+  ai?: AiConfig;
   commit?: CommitConfig;
   repos: Record<string, RepoConfig>; // "owner/repo" → RepoConfig
 }

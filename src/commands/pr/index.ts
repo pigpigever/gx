@@ -11,6 +11,8 @@ export function prCommand(): Command {
     .option("-t, --targets <list>", t("pr.optionTargets"))
     .option("--title <text>", t("pr.optionTitle"))
     .option("--body <text>", t("pr.optionBody"))
+    .option("--ai", t("pr.optionAi"))
+    .option("--no-ai", t("pr.optionNoAi"))
     .option("--draft", t("pr.optionDraft"))
     .option("--dry-run", t("pr.optionDryRun"))
     .option("-y, --yes", t("pr.optionYes"))
