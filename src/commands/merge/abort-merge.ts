@@ -1,4 +1,5 @@
-import { execSync } from "node:child_process";
+import { promisify } from "node:util";
+import { exec as execCb } from "node:child_process";
 import chalk from "chalk";
 import {
   getGitContext,
@@ -10,6 +11,12 @@ import {
 import { confirmAction } from "@/lib/interactor.js";
 import { t } from "@/lib/i18n.js";
 import * as out from "@/lib/output.js";
+
+const execAsync = promisify(execCb);
+
+async function abortGitMerge(): Promise<void> {
+  await execAsync("git merge --abort");
+}
 
 export async function abortMerge(): Promise<void> {
   if (!isOnGxMergeBranch()) {
@@ -27,22 +34,26 @@ export async function abortMerge(): Promise<void> {
 
   // Abort git merge if in progress
   if (isMergeInProgress()) {
-    execSync("git merge --abort", { stdio: "inherit" });
+    await abortGitMerge();
   }
 
   // Switch back to source branch
-  const sourceMatch = tempBranch.match(/merge\/(.+?)-to-/);
+  const targetMatch = tempBranch.match(/merge\/.+-to-(.+)-\d{12}$/);
+  const targetHyphen = targetMatch ? targetMatch[1].replace(/\//g, "-") : "";
+  const sourceMatch = targetHyphen
+    ? tempBranch.match(new RegExp(`merge/(.+)-to-${targetHyphen.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d{12}$`))
+    : tempBranch.match(/merge\/(.+)-to-/);
   const sourceBranch = sourceMatch ? sourceMatch[1].replace(/-/g, "/") : "main";
 
   try {
-    checkoutBranch(sourceBranch);
+    await checkoutBranch(sourceBranch);
   } catch {
     // If source branch doesn't exist locally, go to main
-    checkoutBranch("main");
+    await checkoutBranch("main");
   }
 
   // Delete temp branch
-  deleteLocalBranch(tempBranch);
+  await deleteLocalBranch(tempBranch);
 
   out.success(t("merge.mergeAborted", { temp: tempBranch, branch: sourceBranch }));
   out.blank();

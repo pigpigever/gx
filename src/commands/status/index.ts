@@ -18,7 +18,7 @@ export function statusCommand(): Command {
           out.warning(t("status.notAuth"));
         } else {
           const spinner = startSpinner(t("status.fetchingPrs"));
-          const prs = listOpenPRs(ctx.owner, ctx.repo);
+          const prs = await listOpenPRs(ctx.owner, ctx.repo);
           succeed(spinner, t("status.fetchedPrs", { count: prs.length }));
           for (const pr of prs) {
             if (pr.head === ctx.currentBranch) pr.author = "me";

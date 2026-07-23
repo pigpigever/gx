@@ -1,4 +1,8 @@
 import { execSync } from "node:child_process";
+import { promisify } from "node:util";
+import { exec as execCb } from "node:child_process";
+
+const execAsync = promisify(execCb);
 
 // ── helpers ──
 
@@ -151,11 +155,11 @@ export function getStagedDiff(): string {
 
 // ── Commit ──
 
-export function runCommit(message: string): void {
+export async function runCommit(message: string): Promise<void> {
   const escaped = message
     .replace(/\\/g, "\\\\")
     .replace(/"/g, '\\"')
     .replace(/\$/g, "\\$")
     .replace(/`/g, "\\`");
-  execSync(`git commit -m "${escaped}"`, { stdio: "inherit" });
+  await execAsync(`git commit -m "${escaped}"`);
 }

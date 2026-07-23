@@ -70,7 +70,7 @@ export async function runInteractiveCommit(
     return;
   }
 
-  runCommit(fullMessage);
+  await runCommit(fullMessage);
   out.success(t("commit.committed", { msg: formatShort(type, scope, msg) }));
 }
 

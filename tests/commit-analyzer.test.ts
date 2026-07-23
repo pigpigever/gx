@@ -177,14 +177,14 @@ describe("analyzeStaged (git)", () => {
     }
   });
 
-  it("runCommit creates a commit", () => {
+  it("runCommit creates a commit", async () => {
     writeFileSync(join(repoDir, "baz.ts"), "");
     run("git add baz.ts");
 
     const origCwd = process.cwd();
     process.chdir(repoDir);
     try {
-      runCommit("feat: add baz");
+      await runCommit("feat: add baz");
       const log = run("git log --oneline -1");
       expect(log).toContain("feat: add baz");
     } finally {
