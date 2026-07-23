@@ -359,6 +359,26 @@ const en: LocaleStrings = {
     complete: "Sweep complete.",
   },
 
+  setup: {
+    description: "Interactive setup wizard for first-time configuration",
+    optionSkipAll: "Skip all steps and use defaults",
+    firstRun: "👋 Welcome to gx! It looks like this is your first time.",
+    runningWizard: "Running setup wizard...",
+    welcome: "Welcome to gx! Let's set up your environment.",
+    language: "Choose your language",
+    languagePrompt: "Language",
+    languageSaved: "Language set to {{lang}}",
+    aiConfig: "AI Configuration",
+    configureAi: "Configure AI for commit/PR generation?",
+    aiSkipped: "AI configuration skipped.",
+    done: "Setup complete!",
+    complete: "Setup complete!",
+    summaryTitle: "Configuration saved:",
+    configPath: "Config: {{path}}",
+    nextSteps: "What you can do next:",
+    nextStepsDetail: "  gx pr        Create PRs to target branches\n  gx merge     Safe merge via temp branch\n  gx commit    Smart conventional commit\n  gx status    Show open PRs\n  gx config    Manage settings\n  gx setup     Re-run setup anytime",
+  },
+
   step: {
     indicator: "Step {{current}}/{{total}}:",
   },
