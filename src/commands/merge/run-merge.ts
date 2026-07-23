@@ -20,7 +20,7 @@ export async function runMerge(opts: any): Promise<void> {
     throw new Error(t("merge.inProgress"));
   }
 
-  if (!isGhAuthenticated()) {
+  if (!await isGhAuthenticated()) {
     throw new Error(t("pr.authError"));
   }
 

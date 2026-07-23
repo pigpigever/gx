@@ -20,10 +20,10 @@ const zh: LocaleStrings = {
     optionDryRun: "仅显示将要执行的操作",
     optionYes: "跳过确认提示",
 
-    preflight: "执行预检查",
+    preflight: "执行预检查（GitHub 认证、未推送的提交）",
     preflightFailed: "GitHub 认证失败",
     preflightUnpushed: "预检查完成（检测到未推送的提交）",
-    preflightPassed: "预检查通过",
+    preflightPassed: "预检查通过（GitHub 认证正常，无未推送的提交）",
     authError: "未通过 GitHub 认证。请运行 'gh auth login' 或设置 GITHUB_TOKEN。",
     invalidSource: "无效的源分支",
     sourceIsTarget: "源分支 '{{source}}' 也是一个目标分支。请切换到功能分支。",
@@ -75,8 +75,8 @@ const zh: LocaleStrings = {
     conflictsFound: "发现 {{count}} 个冲突",
     noConflicts: "未检测到冲突",
 
-    fetching: "正在获取最新更改",
-    fetched: "已获取最新更改",
+    fetching: "正在从所有远程仓库获取最新更改",
+    fetched: "已从所有远程仓库获取最新更改",
     validatingTargets: "正在验证目标分支",
     validatingTarget: "正在检查 {{target}}",
     validatedTargets: "已验证 {{count}} 个目标分支",

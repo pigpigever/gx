@@ -63,9 +63,9 @@ export function isGhInstalled(): boolean {
   }
 }
 
-export function isGhAuthenticated(): boolean {
+export async function isGhAuthenticated(): Promise<boolean> {
   try {
-    execSync("gh auth status", { stdio: "pipe" });
+    await execAsync("gh auth status");
     return true;
   } catch {
     return getAuthToken() !== null;

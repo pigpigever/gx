@@ -57,7 +57,7 @@ export async function runPr(opts: any): Promise<void> {
   // ── Pre-flight checks ──
   const spinner = startSpinner(t("pr.preflight"));
 
-  if (!isGhAuthenticated()) {
+  if (!await isGhAuthenticated()) {
     fail(spinner, t("pr.preflightFailed"));
     throw new Error(t("pr.authError"));
   }
@@ -67,13 +67,13 @@ export async function runPr(opts: any): Promise<void> {
     throw new Error(t("pr.sourceIsTarget", { source: sourceBranch }));
   }
 
-  if (hasUnpushedCommits(sourceBranch)) {
+  if (await hasUnpushedCommits(sourceBranch)) {
     succeed(spinner, t("pr.preflightUnpushed"));
   } else {
     succeed(spinner, t("pr.preflightPassed"));
   }
 
-  if (hasUnpushedCommits(sourceBranch)) {
+  if (await hasUnpushedCommits(sourceBranch)) {
     if (!opts.yes) {
       const proceed = await confirmAction(
         t("pr.unpushedConfirm", { branch: sourceBranch }),
@@ -91,7 +91,7 @@ export async function runPr(opts: any): Promise<void> {
   // ── Determine targets ──
   let targets: string[];
   const fetchSpinner = startSpinner(t("pr.fetching"));
-  fetchAll();
+  await fetchAll();
   succeed(fetchSpinner, t("pr.fetched"));
 
   if (opts.targets) {
