@@ -63,7 +63,7 @@ export async function runPr(opts: any): Promise<void> {
 
     const checkoutSpinner = startSpinner(t("pr.checkingOut", { branch: sourceBranch }));
     try {
-      checkoutBranch(sourceBranch);
+      await checkoutBranch(sourceBranch);
       succeed(checkoutSpinner, t("pr.checkedOut", { branch: sourceBranch }));
     } catch {
       fail(checkoutSpinner, t("pr.checkoutFailed", { branch: sourceBranch }));

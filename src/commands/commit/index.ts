@@ -34,7 +34,7 @@ async function runCommitCmd(opts: any): Promise<void> {
       console.log(chalk.bold.cyan(`[DRY RUN] git commit -m "${msg}"`));
       return;
     }
-    runCommit(msg);
+    await runCommit(msg);
     out.success(t("commit.committed", { msg }));
     return;
   }

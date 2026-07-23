@@ -39,7 +39,7 @@ export async function runCleanup(opts: any): Promise<void> {
   const prSpinner = startSpinner(t("cleanup.fetchingPrs"));
   const branchPRs = new Map<string, BranchPRInfo[]>();
   for (const b of branches) {
-    branchPRs.set(b.name, getPRsForBranch(ctx.owner, ctx.repo, b.name));
+    branchPRs.set(b.name, await getPRsForBranch(ctx.owner, ctx.repo, b.name));
   }
   succeed(prSpinner, t("cleanup.prsFetched"));
 
@@ -113,14 +113,14 @@ export async function runCleanup(opts: any): Promise<void> {
   ));
   for (const name of uniqueRemotes) {
     const s = startSpinner(t("cleanup.deletingRemote", { name }));
-    try { deleteRemoteBranch(name); succeed(s, t("cleanup.deletedRemote", { name })); }
+    try { await deleteRemoteBranch(name); succeed(s, t("cleanup.deletedRemote", { name })); }
     catch { fail(s, t("cleanup.deleteRemoteFailed", { name })); }
   }
 
   for (const b of toDelete.filter((b) => b.isLocal)) {
     if (b.name === ctx.currentBranch) { out.warning(t("cleanup.skippingCurrent", { name: b.name })); continue; }
     const s = startSpinner(t("cleanup.deletingLocal", { name: b.name }));
-    try { deleteLocalBranch(b.name); succeed(s, t("cleanup.deletedLocal", { name: b.name })); }
+    try { await deleteLocalBranch(b.name); succeed(s, t("cleanup.deletedLocal", { name: b.name })); }
     catch { fail(s, t("cleanup.deleteLocalFailed", { name: b.name })); }
   }
 
