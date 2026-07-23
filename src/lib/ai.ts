@@ -22,19 +22,27 @@ export const AI_PROVIDERS: AiProvider[] = [
 
 // ── Config reading ──
 
+function isFreeProvider(value?: string): boolean {
+  return AI_PROVIDERS.some((p) => p.value === value && p.free);
+}
+
 export function getAiConfig(): AiConfig | null {
   const config = loadConfig();
   // 优先读顶层 ai，fallback 到 commit.ai
-  if (config.ai?.apiKey) {
-    return config.ai;
+  if (config.ai) {
+    if (config.ai.apiKey || isFreeProvider(config.ai.provider)) {
+      return config.ai;
+    }
   }
-  if (config.commit?.ai?.apiKey) {
-    return {
-      provider: config.commit.ai.provider,
-      model: config.commit.ai.model || "gpt-4o-mini",
-      endpoint: config.commit.ai.endpoint || "https://api.openai.com/v1/chat/completions",
-      apiKey: config.commit.ai.apiKey,
-    };
+  if (config.commit?.ai) {
+    if (config.commit.ai.apiKey || isFreeProvider(config.commit.ai.provider)) {
+      return {
+        provider: config.commit.ai.provider,
+        model: config.commit.ai.model || "gpt-4o-mini",
+        endpoint: config.commit.ai.endpoint || "https://api.openai.com/v1/chat/completions",
+        apiKey: config.commit.ai.apiKey || "",
+      };
+    }
   }
   // 检查环境变量
   const envKey = process.env.GX_AI_KEY;
@@ -56,12 +64,15 @@ export async function callAiApi(
   model: string,
   prompt: string
 ): Promise<string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (apiKey) {
+    headers["Authorization"] = `Bearer ${apiKey}`;
+  }
   const res = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
+    headers,
     body: JSON.stringify({
       model,
       messages: [{ role: "user", content: prompt }],
