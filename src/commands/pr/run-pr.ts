@@ -22,6 +22,26 @@ import { t } from "@/lib/i18n.js";
 import type { PRResult } from "@/types.js";
 import * as out from "@/lib/output.js";
 
+function translatePrError(err: string, head: string, base: string): string {
+  if (err.startsWith("errorNoCommits|")) {
+    return t("pr.errorNoCommits", { head, base });
+  }
+  if (err.startsWith("errorBranchNotFound|")) {
+    return t("pr.errorBranchNotFound", { head });
+  }
+  if (err === "errorPermissionDenied") {
+    return t("pr.errorPermissionDenied");
+  }
+  if (err === "errorRateLimit") {
+    return t("pr.errorRateLimit");
+  }
+  if (err === "errorNetwork") {
+    return t("pr.errorNetwork");
+  }
+  // Unknown error — return cleaned-up message from parseGhPrError
+  return err;
+}
+
 export async function runPr(opts: any): Promise<void> {
   const ctx = getGitContext();
   let sourceBranch = opts.branch || ctx.currentBranch;
@@ -282,7 +302,7 @@ export async function runPr(opts: any): Promise<void> {
       });
       return { target, status: "created", url: created.url, number: created.number, error: "" };
     } catch (err: any) {
-      return { target, status: "error", url: "", number: null, error: err.message };
+      return { target, status: "error", url: "", number: null, error: translatePrError(err.message, sourceBranch, target) };
     }
   });
 

@@ -69,6 +69,12 @@ const zh: LocaleStrings = {
     skippedExisting: "已有 PR",
     skippedReason: "已跳过（{{reason}}）",
     errorPrefix: "错误: {{msg}}",
+    errorNoCommits: "'{{head}}' 没有新提交可以 PR 到 '{{base}}'",
+    errorBranchNotFound: "分支 '{{head}}' 在远程不存在 — 请先推送",
+    errorPermissionDenied: "权限不足 — 请检查仓库访问权限",
+    errorRateLimit: "GitHub API 请求频率超限 — 请稍后再试",
+    errorNetwork: "网络错误 — 请检查网络连接",
+    errorGeneric: "创建 PR 失败（{{detail}}）",
 
     checkingConflicts: "检查合并冲突",
     checkingConflictProgress: "正在检查 {{target}}（{{current}}/{{total}}）",

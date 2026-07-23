@@ -71,6 +71,12 @@ const en: LocaleStrings = {
     skippedExisting: "existing PR",
     skippedReason: "skipped ({{reason}})",
     errorPrefix: "error: {{msg}}",
+    errorNoCommits: "no new commits to PR from '{{head}}' into '{{base}}'",
+    errorBranchNotFound: "branch '{{head}}' not found on remote — push it first",
+    errorPermissionDenied: "insufficient permissions — check repo access",
+    errorRateLimit: "GitHub API rate limit exceeded — try again later",
+    errorNetwork: "network error — check your connection",
+    errorGeneric: "failed to create PR ({{detail}})",
 
     checkingConflicts: "Checking for merge conflicts",
     checkingConflictProgress: "Checking {{target}} ({{current}}/{{total}})",

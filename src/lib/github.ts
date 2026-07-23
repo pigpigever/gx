@@ -109,6 +109,45 @@ export interface CreatedPR {
   number: number;
 }
 
+function parseGhPrError(stderr: string, head: string, base: string): string {
+  const lower = stderr.toLowerCase();
+
+  if (lower.includes("no commits between")) {
+    return `errorNoCommits|${head}|${base}`;
+  }
+  if (
+    lower.includes("head ref must be a valid ref") ||
+    lower.includes("branch not found") ||
+    (lower.includes("not found") && lower.includes("head"))
+  ) {
+    return `errorBranchNotFound|${head}`;
+  }
+  if (
+    lower.includes("resource not accessible") ||
+    lower.includes("403") ||
+    lower.includes("forbidden")
+  ) {
+    return `errorPermissionDenied`;
+  }
+  if (lower.includes("rate limit")) {
+    return `errorRateLimit`;
+  }
+  if (
+    lower.includes("net::err") ||
+    lower.includes("econnrefused") ||
+    lower.includes("enotfound")
+  ) {
+    return `errorNetwork`;
+  }
+
+  // Strip the raw gh command from the error for a cleaner fallback
+  const cmdMatch = stderr.match(/gh pr create\s+[\s\S]*?(?:\n|$)/);
+  const cleaned = cmdMatch
+    ? stderr.replace(cmdMatch[0], "").trim()
+    : stderr.trim();
+  return cleaned || "Unknown error";
+}
+
 export async function createPR(opts: PRCreateOptions): Promise<CreatedPR> {
   const { owner, repo, head, base, title, body, draft } = opts;
 
@@ -130,9 +169,10 @@ export async function createPR(opts: PRCreateOptions): Promise<CreatedPR> {
       const result = await createPRRestAsync(opts, token);
       if (result) return result;
     }
-    throw new Error(
-      `Failed to create PR to ${base}: ${err?.stderr || err?.message || err}`
-    );
+
+    const raw = err?.stderr || err?.message || String(err);
+    const parsed = parseGhPrError(raw, head, base);
+    throw new Error(parsed);
   }
 }
 
