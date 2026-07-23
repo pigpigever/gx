@@ -22,7 +22,7 @@ import { t } from "@/lib/i18n.js";
 import type { PRResult } from "@/types.js";
 import * as out from "@/lib/output.js";
 
-function translatePrError(err: string, head: string, base: string): string {
+export function translatePrError(err: string, head: string, base: string): string {
   if (err.startsWith("errorNoCommits|")) {
     return t("pr.errorNoCommits", { head, base });
   }
