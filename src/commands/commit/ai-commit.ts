@@ -61,7 +61,7 @@ export async function runAiCommit(
       return;
     }
 
-    runCommit(msg);
+    await runCommit(msg);
     out.success(t("commit.committed", { msg: msg.split("\n")[0] }));
   } catch (err: any) {
     fail(spinner, t("commit.aiFailed"));

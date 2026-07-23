@@ -1,4 +1,5 @@
-import { execSync } from "node:child_process";
+import { promisify } from "node:util";
+import { exec as execCb } from "node:child_process";
 import chalk from "chalk";
 import {
   getGitContext,
@@ -13,6 +14,12 @@ import { startSpinner, succeed, fail } from "@/lib/spinner.js";
 import { t } from "@/lib/i18n.js";
 import * as out from "@/lib/output.js";
 
+const execAsync = promisify(execCb);
+
+async function rebaseAsync(branch: string): Promise<void> {
+  await execAsync(`git rebase origin/${branch}`);
+}
+
 export async function runSync(opts: any): Promise<void> {
   const ctx = getGitContext();
   const sourceBranch = ctx.currentBranch;
@@ -23,7 +30,7 @@ export async function runSync(opts: any): Promise<void> {
   out.blank();
 
   let spinner = startSpinner(t("sync.fetching", { branch: fromBranch }));
-  fetchBranch(fromBranch);
+  await fetchBranch(fromBranch);
   succeed(spinner, t("sync.fetched", { branch: fromBranch }));
 
   if (!isBehindRemote(sourceBranch, fromBranch)) {
@@ -50,7 +57,7 @@ export async function runSync(opts: any): Promise<void> {
   if (opts.rebase) {
     spinner = startSpinner(t("sync.rebasing", { branch: fromBranch }));
     try {
-      execSync(`git rebase origin/${fromBranch}`, { stdio: "pipe" });
+      await rebaseAsync(fromBranch);
       succeed(spinner, t("sync.rebased", { branch: sourceBranch, from: fromBranch }));
     } catch {
       fail(spinner, t("sync.rebaseConflicts"));
@@ -58,7 +65,7 @@ export async function runSync(opts: any): Promise<void> {
     }
   } else {
     spinner = startSpinner(t("sync.merging", { from: fromBranch, into: sourceBranch }));
-    const result = mergeBranch(`origin/${fromBranch}`);
+    const result = await mergeBranch(`origin/${fromBranch}`);
     if (result.hasConflicts) {
       fail(spinner, t("sync.mergeConflicts", { count: result.conflictedFiles.length }));
       for (const f of result.conflictedFiles) console.log(`  ${chalk.red(f)}`);

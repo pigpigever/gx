@@ -1,4 +1,3 @@
-import { execSync } from "node:child_process";
 import chalk from "chalk";
 import {
   getGitContext,
@@ -27,25 +26,26 @@ export async function continueMerge(): Promise<void> {
     );
   }
 
-  const tempBranch = execSync("git branch --show-current", { encoding: "utf-8" }).trim();
+  const ctx = getGitContext();
+  const tempBranch = ctx.currentBranch;
 
   out.blank();
   console.log(chalk.bold(t("merge.continuing")));
 
   if (isMergeInProgress()) {
     const s = startSpinner(t("merge.committingResolution"));
-    commitMerge();
+    await commitMerge();
     succeed(s, t("merge.committedResolution"));
   }
 
   let s = startSpinner(t("merge.pushing"));
-  pushBranch(tempBranch);
+  await pushBranch(tempBranch);
   succeed(s, t("merge.pushed", { name: chalk.cyan(tempBranch) }));
 
-  const ctx = getGitContext();
-  const targetMatch = tempBranch.match(/merge\/.+?-to-(.+?)-\d{12}$/);
+  const targetMatch = tempBranch.match(/merge\/.+-to-(.+)-\d{12}$/);
   const targetBranch = targetMatch ? targetMatch[1] : "develop";
-  const sourceMatch = tempBranch.match(/merge\/(.+?)-to-/);
+  const targetHyphen = targetBranch.replace(/\//g, "-");
+  const sourceMatch = tempBranch.match(new RegExp(`merge/(.+)-to-${targetHyphen.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}-\\d{12}$`));
   const sourceBranch = sourceMatch ? sourceMatch[1].replace(/-/g, "/") : "unknown";
 
   s = startSpinner(t("merge.creatingPr"));

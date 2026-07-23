@@ -50,7 +50,7 @@ export async function runMerge(opts: any): Promise<void> {
 
   // ── Step 1: Fetch target ──
   let spinner = startSpinner(t("merge.fetching", { branch: targetBranch }));
-  fetchBranch(targetBranch);
+  await fetchBranch(targetBranch);
   succeed(spinner, t("merge.fetched", { branch: targetBranch }));
 
   // ── Step 2: Create temp merge branch ──
@@ -58,12 +58,12 @@ export async function runMerge(opts: any): Promise<void> {
   const tempBranch = `merge/${sourceBranch.replace(/\//g, "-")}-to-${targetBranch.replace(/\//g, "-")}-${timestamp}`;
 
   spinner = startSpinner(t("merge.creatingTemp", { name: tempBranch }));
-  createBranch(tempBranch, targetBranch);
+  await createBranch(tempBranch, targetBranch);
   succeed(spinner, t("merge.createdTemp", { name: chalk.cyan(tempBranch) }));
 
   // ── Step 3: Merge source into temp ──
   spinner = startSpinner(t("merge.merging", { source: sourceBranch, temp: tempBranch }));
-  const mergeResult = mergeBranch(sourceBranch);
+  const mergeResult = await mergeBranch(sourceBranch);
 
   if (mergeResult.hasConflicts) {
     fail(spinner, t("merge.conflicts", { count: mergeResult.conflictedFiles.length }));
@@ -97,7 +97,7 @@ export async function runMerge(opts: any): Promise<void> {
 
   // ── Step 4: Push ──
   spinner = startSpinner(t("merge.pushing"));
-  pushBranch(tempBranch);
+  await pushBranch(tempBranch);
   succeed(spinner, t("merge.pushed", { name: chalk.cyan(tempBranch) }));
 
   // ── Step 5: Create PR ──

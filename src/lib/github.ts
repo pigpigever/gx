@@ -201,15 +201,14 @@ async function createPRRestAsync(opts: PRCreateOptions, token: string): Promise<
 
 // ── List PRs ──
 
-export function listOpenPRs(
+export async function listOpenPRs(
   owner: string,
   repo: string
-): PROverview[] {
+): Promise<PROverview[]> {
   try {
-    const json = execSync(
-      `gh pr list --repo "${owner}/${repo}" --state open --json number,title,headRefName,baseRefName,state,url,author,isDraft,statusCheckRollup --limit 50`,
-      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-    ).trim();
+    const json = await execAsync(
+      `gh pr list --repo "${owner}/${repo}" --state open --json number,title,headRefName,baseRefName,state,url,author,isDraft,statusCheckRollup --limit 50`
+    );
 
     if (!json || json === "[]") return [];
 
@@ -227,22 +226,19 @@ export function listOpenPRs(
     }));
   } catch {
     const token = getAuthToken();
-    if (token) return listOpenPRsRestSync(owner, repo, token);
+    if (token) return await listOpenPRsRestAsync(owner, repo, token);
     return [];
   }
 }
 
-function listOpenPRsRestSync(
+async function listOpenPRsRestAsync(
   owner: string,
   repo: string,
   token: string
-): PROverview[] {
+): Promise<PROverview[]> {
   try {
     const cmd = `curl -s "https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=50" -H "Authorization: token ${token}" -H "Accept: application/vnd.github.v3+json"`;
-    const output = execSync(cmd, {
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    const output = await execAsync(cmd);
 
     const data = JSON.parse(output);
     if (!Array.isArray(data)) return [];
@@ -315,12 +311,11 @@ export interface BranchPRInfo {
   url: string;
 }
 
-export function getPRsForBranch(owner: string, repo: string, head: string): BranchPRInfo[] {
+export async function getPRsForBranch(owner: string, repo: string, head: string): Promise<BranchPRInfo[]> {
   try {
-    const json = execSync(
-      `gh pr list --head "${head}" --repo "${owner}/${repo}" --json number,title,state,url`,
-      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }
-    ).trim();
+    const json = await execAsync(
+      `gh pr list --head "${head}" --repo "${owner}/${repo}" --json number,title,state,url`
+    );
     if (!json || json === "[]") return [];
     return JSON.parse(json) as BranchPRInfo[];
   } catch {

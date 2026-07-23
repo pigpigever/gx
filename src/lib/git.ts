@@ -104,21 +104,21 @@ export function getRemoteBranches(): string[] {
 
 // ── Merge operations ──
 
-export function fetchBranch(branch: string): void {
-  execSync(`git fetch origin ${branch}`, { stdio: "inherit" });
+export async function fetchBranch(branch: string): Promise<void> {
+  await execAsync(`git fetch origin ${branch}`);
 }
 
-export function createBranch(name: string, from: string): void {
-  execSync(`git checkout -b ${name} origin/${from}`, { stdio: "inherit" });
+export async function createBranch(name: string, from: string): Promise<void> {
+  await execAsync(`git checkout -b ${name} origin/${from}`);
 }
 
-export function checkoutBranch(branch: string): void {
-  execSync(`git checkout ${branch}`, { stdio: "inherit" });
+export async function checkoutBranch(branch: string): Promise<void> {
+  await execAsync(`git checkout ${branch}`);
 }
 
-export function mergeBranch(source: string): { hasConflicts: boolean; conflictedFiles: string[] } {
+export async function mergeBranch(source: string): Promise<{ hasConflicts: boolean; conflictedFiles: string[] }> {
   try {
-    execSync(`git merge ${source} --no-edit`, { stdio: "inherit" });
+    await execAsync(`git merge ${source} --no-edit`);
     return { hasConflicts: false, conflictedFiles: [] };
   } catch {
     // Merge conflict — extract conflicted files
@@ -127,21 +127,21 @@ export function mergeBranch(source: string): { hasConflicts: boolean; conflicted
   }
 }
 
-export function commitMerge(): void {
-  execSync("git commit --no-edit", { stdio: "inherit" });
+export async function commitMerge(): Promise<void> {
+  await execAsync("git commit --no-edit");
 }
 
-export function pushBranch(branch: string, setUpstream = true): void {
+export async function pushBranch(branch: string, setUpstream = true): Promise<void> {
   const flag = setUpstream ? "-u" : "";
-  execSync(`git push ${flag} origin ${branch}`, { stdio: "inherit" });
+  await execAsync(`git push ${flag} origin ${branch}`);
 }
 
-export function deleteLocalBranch(branch: string): void {
-  execSync(`git branch -D ${branch}`, { stdio: "inherit" });
+export async function deleteLocalBranch(branch: string): Promise<void> {
+  await execAsync(`git branch -D ${branch}`);
 }
 
-export function deleteRemoteBranch(branch: string): void {
-  execSync(`git push origin --delete ${branch}`, { stdio: "inherit" });
+export async function deleteRemoteBranch(branch: string): Promise<void> {
+  await execAsync(`git push origin --delete ${branch}`);
 }
 
 // ── Merge state detection (using git native state, no extra files) ──

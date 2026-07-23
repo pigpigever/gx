@@ -41,7 +41,7 @@ export async function runSweep(opts: any): Promise<void> {
   const prSpinner = startSpinner(t("sweep.fetchingPrs"));
   const branchPRs = new Map<string, BranchPRInfo[]>();
   for (const b of branches) {
-    branchPRs.set(b.name, getPRsForBranch(ctx.owner, ctx.repo, b.name));
+    branchPRs.set(b.name, await getPRsForBranch(ctx.owner, ctx.repo, b.name));
   }
   succeed(prSpinner, t("sweep.prsFetched"));
 
@@ -105,14 +105,14 @@ export async function runSweep(opts: any): Promise<void> {
   const remotes = Array.from(new Set(toDelete.filter((b) => b.isRemote).map((b) => b.name)));
   for (const name of remotes) {
     const s = startSpinner(t("sweep.deletingRemote", { name }));
-    try { deleteRemoteBranch(name); succeed(s, t("sweep.deletedRemote", { name })); }
+    try { await deleteRemoteBranch(name); succeed(s, t("sweep.deletedRemote", { name })); }
     catch { fail(s, t("sweep.deleteRemoteFailed", { name })); }
   }
 
   for (const b of toDelete.filter((b) => b.isLocal)) {
     if (b.name === ctx.currentBranch) { out.warning(t("sweep.skippingCurrent", { name: b.name })); continue; }
     const s = startSpinner(t("sweep.deletingLocal", { name: b.name }));
-    try { deleteLocalBranch(b.name); succeed(s, t("sweep.deletedLocal", { name: b.name })); }
+    try { await deleteLocalBranch(b.name); succeed(s, t("sweep.deletedLocal", { name: b.name })); }
     catch { fail(s, t("sweep.deleteLocalFailed", { name: b.name })); }
   }
 
