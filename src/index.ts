@@ -5,7 +5,7 @@ import chalk from "chalk";
 import pkg from "../package.json";
 
 import { registerLocale, initI18n, loadLocale, t } from "./lib/i18n.js";
-import { loadConfig } from "./lib/config-store.js";
+import { loadConfig, configExists } from "./lib/config-store.js";
 import { prCommand } from "./commands/pr/index.js";
 import { mergeCommand } from "./commands/merge/index.js";
 import { configCommand } from "./commands/config/index.js";
@@ -14,6 +14,7 @@ import { syncCommand } from "./commands/sync/index.js";
 import { cleanupCommand } from "./commands/cleanup/index.js";
 import { commitCommand } from "./commands/commit/index.js";
 import { sweepCommand } from "./commands/sweep/index.js";
+import { setupCommand } from "./commands/setup/index.js";
 
 // Register locales (lazy-loaded)
 registerLocale("en", () => import("./locales/en.js"));
@@ -59,11 +60,26 @@ async function main() {
   program.addCommand(cleanupCommand());
   program.addCommand(commitCommand());
   program.addCommand(sweepCommand());
+  program.addCommand(setupCommand());
 
   // Default behavior: show help
   program.action(() => {
     program.outputHelp();
   });
+
+  // First-run detection: auto-run setup wizard
+  const isSetupCommand = process.argv.includes("setup");
+  const isSkipAll = process.argv.includes("--skip-all");
+  if (!configExists() && !isSetupCommand) {
+    console.log(LOGO);
+    console.log(chalk.cyan(t("setup.firstRun")));
+    console.log(chalk.dim(t("setup.runningWizard")));
+    console.log();
+    const { runSetupWizard } = await import("./commands/setup/wizard.js");
+    await runSetupWizard({ skipAll: isSkipAll });
+    await loadLocale();
+    console.log();
+  }
 
   program.parse();
 }

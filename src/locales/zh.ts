@@ -355,6 +355,26 @@ const zh: LocaleStrings = {
     complete: "清理完成。",
   },
 
+  setup: {
+    description: "首次运行交互式引导",
+    optionSkipAll: "跳过所有步骤，使用默认配置",
+    firstRun: "👋 欢迎使用 gx！看起来这是你第一次运行。",
+    runningWizard: "正在启动引导程序...",
+    welcome: "欢迎使用 gx！让我们来配置你的环境。",
+    language: "选择语言",
+    languagePrompt: "语言",
+    languageSaved: "语言已设置为 {{lang}}",
+    aiConfig: "AI 配置",
+    configureAi: "配置 AI 用于提交/PR 生成？",
+    aiSkipped: "已跳过 AI 配置。",
+    done: "配置完成！",
+    complete: "配置完成！",
+    summaryTitle: "配置已保存：",
+    configPath: "配置文件: {{path}}",
+    nextSteps: "接下来你可以：",
+    nextStepsDetail: "  gx pr        创建 PR 到目标分支\n  gx merge     通过临时分支安全合并\n  gx commit    智能约定式提交\n  gx status    查看 PR 概览\n  gx config    管理设置\n  gx setup     随时重新配置",
+  },
+
   step: {
     indicator: "步骤 {{current}}/{{total}}:",
   },
