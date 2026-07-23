@@ -22,10 +22,10 @@ const en: LocaleStrings = {
     optionDryRun: "Show what would be done without creating PRs",
     optionYes: "Skip confirmation prompts",
 
-    preflight: "Running pre-flight checks",
+    preflight: "Running pre-flight checks (GitHub auth, unpushed commits)",
     preflightFailed: "GitHub authentication failed",
     preflightUnpushed: "Pre-flight checks done (unpushed commits detected)",
-    preflightPassed: "Pre-flight checks passed",
+    preflightPassed: "Pre-flight checks passed (GitHub auth OK, no unpushed commits)",
     authError: "Not authenticated with GitHub. Run 'gh auth login' or set GITHUB_TOKEN.",
     invalidSource: "Invalid source branch",
     sourceIsTarget: "Source branch '{{source}}' is also a target. Switch to a feature branch.",
@@ -77,8 +77,8 @@ const en: LocaleStrings = {
     conflictsFound: "{{count}} conflict(s) found",
     noConflicts: "No conflicts detected",
 
-    fetching: "Fetching latest changes",
-    fetched: "Fetched latest changes",
+    fetching: "Fetching latest changes from all remotes",
+    fetched: "Fetched latest changes from all remotes",
     validatingTargets: "Validating target branches",
     validatingTarget: "Checking {{target}}",
     validatedTargets: "Validated {{count}} target(s)",

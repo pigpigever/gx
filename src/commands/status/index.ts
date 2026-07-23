@@ -14,7 +14,7 @@ export function statusCommand(): Command {
         out.printContext(ctx.owner, ctx.repo, ctx.currentBranch);
         out.blank();
 
-        if (!isGhAuthenticated()) {
+        if (!await isGhAuthenticated()) {
           out.warning(t("status.notAuth"));
         } else {
           const spinner = startSpinner(t("status.fetchingPrs"));

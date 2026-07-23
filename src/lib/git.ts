@@ -74,8 +74,8 @@ export async function branchExistsOnRemote(branch: string): Promise<boolean> {
   }
 }
 
-export function hasUnpushedCommits(branch: string): boolean {
-  const result = exec(`git rev-list --count origin/${branch}..${branch}`);
+export async function hasUnpushedCommits(branch: string): Promise<boolean> {
+  const result = await execAsync(`git rev-list --count origin/${branch}..${branch}`);
   if (result === "") return false;
   return parseInt(result, 10) > 0;
 }
@@ -173,8 +173,8 @@ export function getMergeHead(): string {
 
 // ── Fetch ──
 
-export function fetchAll(): void {
-  exec("git fetch --all --prune --quiet");
+export async function fetchAll(): Promise<void> {
+  await execAsync("git fetch --all --prune --quiet");
 }
 
 // ── Sync ──
