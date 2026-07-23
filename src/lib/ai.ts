@@ -8,6 +8,7 @@ export interface AiProvider {
   value: string;
   endpoint: string;
   model: string;
+  free?: boolean;
 }
 
 export const AI_PROVIDERS: AiProvider[] = [
@@ -15,7 +16,7 @@ export const AI_PROVIDERS: AiProvider[] = [
   { name: "DeepSeek", value: "deepseek", endpoint: "https://api.deepseek.com/v1/chat/completions", model: "deepseek-chat" },
   { name: "通义千问 (DashScope)", value: "dashscope", endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", model: "qwen-plus" },
   { name: "Moonshot (Kimi)", value: "moonshot", endpoint: "https://api.moonshot.cn/v1/chat/completions", model: "moonshot-v1-8k" },
-  { name: "OpenCode (免费)", value: "opencode", endpoint: "https://opencode.ai/zen/v1/chat/completions", model: "big-pickle" },
+  { name: "OpenCode (免费)", value: "opencode", endpoint: "https://opencode.ai/zen/v1/chat/completions", model: "big-pickle", free: true },
   { name: "自定义 (OpenAI 兼容)", value: "custom", endpoint: "", model: "" },
 ];
 

@@ -34,13 +34,16 @@ export async function runAiConfig(): Promise<void> {
     });
   }
 
-  // Step 3: API Key
-  console.log("");
-  const apiKey = await password({
-    message: t("aiConfig.apiKeyPrompt"),
-    mask: "*",
-    validate: (v) => v.length > 0 || t("aiConfig.apiKeyRequired"),
-  });
+  // Step 3: API Key (skip for free models like opencode)
+  let apiKey = "";
+  if (!preset.free) {
+    console.log("");
+    apiKey = await password({
+      message: t("aiConfig.apiKeyPrompt"),
+      mask: "*",
+      validate: (v) => v.length > 0 || t("aiConfig.apiKeyRequired"),
+    });
+  }
 
   // Step 4: Model
   const model = await input({
